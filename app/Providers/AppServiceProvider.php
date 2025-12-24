@@ -9,6 +9,7 @@ use App\Models\Expense;
 use App\Observers\ContractObserver;
 use App\Observers\ExpenseObserver;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -26,6 +27,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         Contract::observe(ContractObserver::class);
         Expense::observe(ExpenseObserver::class);
 

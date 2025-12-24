@@ -1,17 +1,24 @@
 <?php
 
+use App\Livewire\Advisor\Chat as AdvisorChat;
 use App\Livewire\Contracts\Index as ContractsIndex;
 use App\Livewire\Dashboard;
+use App\Livewire\Events\Create as EventsCreate;
+use App\Livewire\Events\Index as EventsIndex;
 use App\Livewire\Expenses\Index as ExpensesIndex;
-use App\Livewire\Advisor\Chat as AdvisorChat;
+use App\Livewire\Insights\Index as InsightsIndex;
 use App\Livewire\News\Index as NewsIndex;
-use App\Livewire\TrackedEntities\Index as TrackedEntitiesIndex;
+use App\Livewire\Notifications\Index as NotificationsIndex;
 use App\Livewire\Settings\ApiKeys;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\BusinessProfile;
+use App\Livewire\Settings\Notifications;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\TwoFactor;
+use App\Livewire\Standup\Archive as StandupArchive;
+use App\Livewire\Standup\Today as StandupToday;
+use App\Livewire\TrackedEntities\Index as TrackedEntitiesIndex;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -28,7 +35,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('expenses', ExpensesIndex::class)->name('expenses.index');
     Route::get('tracked-entities', TrackedEntitiesIndex::class)->name('tracked-entities.index');
     Route::get('news', NewsIndex::class)->name('news.index');
+    Route::get('notifications', NotificationsIndex::class)->name('notifications.index');
     Route::get('advisor', AdvisorChat::class)->name('advisor.index');
+
+    Route::get('today', StandupToday::class)->name('standup.today');
+    Route::get('standup/archive', StandupArchive::class)->name('standup.archive');
+    Route::get('events', EventsIndex::class)->name('events.index');
+    Route::get('events/create', EventsCreate::class)->name('events.create');
+    Route::get('insights', InsightsIndex::class)->name('insights.index');
 
     Route::redirect('settings', 'settings/profile');
 
@@ -37,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/appearance', Appearance::class)->name('appearance.edit');
     Route::get('settings/api-keys', ApiKeys::class)->name('settings.api-keys');
     Route::get('settings/business-profile', BusinessProfile::class)->name('settings.business-profile');
+    Route::get('settings/notifications', Notifications::class)->name('settings.notifications');
 
     Route::get('settings/two-factor', TwoFactor::class)
         ->middleware(

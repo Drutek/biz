@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
@@ -60,5 +62,62 @@ class User extends Authenticatable
             ->take(2)
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
+    }
+
+    /**
+     * @return HasOne<UserPreference, $this>
+     */
+    public function preferences(): HasOne
+    {
+        return $this->hasOne(UserPreference::class);
+    }
+
+    /**
+     * @return HasMany<BusinessEvent, $this>
+     */
+    public function businessEvents(): HasMany
+    {
+        return $this->hasMany(BusinessEvent::class);
+    }
+
+    /**
+     * @return HasMany<DailyStandup, $this>
+     */
+    public function dailyStandups(): HasMany
+    {
+        return $this->hasMany(DailyStandup::class);
+    }
+
+    /**
+     * Alias for dailyStandups().
+     *
+     * @return HasMany<DailyStandup, $this>
+     */
+    public function standups(): HasMany
+    {
+        return $this->dailyStandups();
+    }
+
+    /**
+     * @return HasMany<ProactiveInsight, $this>
+     */
+    public function proactiveInsights(): HasMany
+    {
+        return $this->hasMany(ProactiveInsight::class);
+    }
+
+    public function getOrCreatePreferences(): UserPreference
+    {
+        return $this->preferences ?? $this->preferences()->create([]);
+    }
+
+    public function unreadInsightsCount(): int
+    {
+        return $this->proactiveInsights()->unread()->active()->count();
+    }
+
+    public function todaysStandup(): ?DailyStandup
+    {
+        return $this->dailyStandups()->forDate(now())->first();
     }
 }

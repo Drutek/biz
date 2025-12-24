@@ -19,6 +19,25 @@
                 </flux:navlist.group>
             </flux:navlist>
 
+            <flux:navlist variant="outline">
+                <flux:navlist.group :heading="__('Activity')" class="grid">
+                    <flux:navlist.item icon="sun" :href="route('standup.today')" :current="request()->routeIs('standup.*')" wire:navigate>{{ __("Today's Briefing") }}</flux:navlist.item>
+                    <flux:navlist.item icon="calendar" :href="route('events.index')" :current="request()->routeIs('events.*')" wire:navigate>{{ __('Events') }}</flux:navlist.item>
+                    <flux:navlist.item icon="light-bulb" :href="route('insights.index')" :current="request()->routeIs('insights.*')" wire:navigate>
+                        {{ __('Insights') }}
+                        @if(auth()->user()->proactiveInsights()->unread()->count() > 0)
+                            <flux:badge size="sm" color="purple">{{ auth()->user()->proactiveInsights()->unread()->count() }}</flux:badge>
+                        @endif
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="bell" :href="route('notifications.index')" :current="request()->routeIs('notifications.*')" wire:navigate>
+                        {{ __('Notifications') }}
+                        @if(auth()->user()->unreadNotifications()->count() > 0)
+                            <flux:badge size="sm" color="red">{{ auth()->user()->unreadNotifications()->count() > 9 ? '9+' : auth()->user()->unreadNotifications()->count() }}</flux:badge>
+                        @endif
+                    </flux:navlist.item>
+                </flux:navlist.group>
+            </flux:navlist>
+
             <flux:spacer />
 
             <flux:navlist variant="outline">
@@ -82,6 +101,8 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            <livewire:notifications.bell />
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

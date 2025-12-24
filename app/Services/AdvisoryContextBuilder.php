@@ -3,20 +3,24 @@
 namespace App\Services;
 
 use App\Enums\ContractStatus;
+use App\Models\BusinessEvent;
 use App\Models\Contract;
 use App\Models\Expense;
 use App\Models\NewsItem;
 use App\Models\Setting;
+use App\Models\User;
 
 class AdvisoryContextBuilder
 {
-    public function build(): string
+    public function build(?User $user = null): string
     {
         $companyName = Setting::get(Setting::KEY_COMPANY_NAME, 'Your Business');
         $businessProfile = $this->formatBusinessProfile();
         $calculator = new CashflowCalculator;
         $summary = $calculator->summary();
         $projections = $calculator->project(6);
+
+        $eventHistory = $user ? $this->formatEventHistory($user) : '';
 
         $context = <<<EOT
 You are a strategic business advisor for {$companyName}. You have access to their current financial position and recent market news.
@@ -40,7 +44,7 @@ CASHFLOW NEXT 6 MONTHS:
 
 RECENT MARKET NEWS:
 {$this->formatRecentNews()}
-
+{$eventHistory}
 ---
 
 Provide strategic advice based on this context. Be direct, practical, and specific. Flag risks proactively. When discussing opportunities, consider the financial constraints shown above.
@@ -203,5 +207,32 @@ EOT;
         }
 
         return implode("\n", $lines);
+    }
+
+    private function formatEventHistory(User $user, int $days = 30): string
+    {
+        $events = BusinessEvent::query()
+            ->where('user_id', $user->id)
+            ->where('occurred_at', '>=', now()->subDays($days))
+            ->orderByDesc('occurred_at')
+            ->limit(30)
+            ->get();
+
+        if ($events->isEmpty()) {
+            return '';
+        }
+
+        $lines = ["\nRECENT BUSINESS EVENTS (past {$days} days):"];
+        foreach ($events as $event) {
+            $date = $event->occurred_at->format('M j');
+            $significance = strtoupper($event->significance->value);
+            $category = ucfirst($event->category->value);
+            $lines[] = "  [{$date}] [{$significance}] [{$category}] {$event->title}";
+            if ($event->description) {
+                $lines[] = "    {$event->description}";
+            }
+        }
+
+        return implode("\n", $lines)."\n";
     }
 }

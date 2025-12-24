@@ -2,6 +2,13 @@
 
 namespace App\Providers;
 
+use App\Events\BusinessEventRecorded;
+use App\Listeners\GenerateInsightOnEvent;
+use App\Models\Contract;
+use App\Models\Expense;
+use App\Observers\ContractObserver;
+use App\Observers\ExpenseObserver;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +26,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Contract::observe(ContractObserver::class);
+        Expense::observe(ExpenseObserver::class);
+
+        Event::listen(
+            BusinessEventRecorded::class,
+            GenerateInsightOnEvent::class
+        );
     }
 }

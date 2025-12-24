@@ -1,1 +1,1 @@
-<x-app-logo-icon class="size-20" />
+<x-app-logo-icon />

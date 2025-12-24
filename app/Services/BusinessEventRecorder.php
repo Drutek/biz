@@ -211,7 +211,8 @@ class BusinessEventRecorder
         string $title,
         ?string $description,
         EventCategory $category,
-        EventSignificance $significance = EventSignificance::Medium
+        EventSignificance $significance = EventSignificance::Medium,
+        ?\Carbon\Carbon $occurredAt = null
     ): BusinessEvent {
         return $this->record(
             user: $user,
@@ -219,7 +220,8 @@ class BusinessEventRecorder
             category: $category,
             title: $title,
             description: $description,
-            significance: $significance
+            significance: $significance,
+            occurredAt: $occurredAt
         );
     }
 
@@ -232,7 +234,8 @@ class BusinessEventRecorder
         EventSignificance $significance = EventSignificance::Medium,
         ?Model $eventable = null,
         ?array $metadata = null,
-        bool $dispatchEvent = true
+        bool $dispatchEvent = true,
+        ?\Carbon\Carbon $occurredAt = null
     ): BusinessEvent {
         $event = BusinessEvent::create([
             'user_id' => $user->id,
@@ -244,7 +247,7 @@ class BusinessEventRecorder
             'eventable_type' => $eventable?->getMorphClass(),
             'eventable_id' => $eventable?->getKey(),
             'metadata' => $metadata,
-            'occurred_at' => now(),
+            'occurred_at' => $occurredAt ?? now(),
         ]);
 
         if ($dispatchEvent) {

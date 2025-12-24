@@ -36,6 +36,81 @@ class Setting extends Model
 
     public const KEY_BUSINESS_KEY_SERVICES = 'business_key_services';
 
+    public const KEY_CASH_BALANCE = 'cash_balance';
+
+    public const KEY_CURRENCY = 'currency';
+
+    public const DEFAULT_CURRENCY = 'USD';
+
+    /**
+     * Supported currencies with their symbols and formatting.
+     *
+     * @return array<string, array{symbol: string, name: string, position: string}>
+     */
+    public static function supportedCurrencies(): array
+    {
+        return [
+            'USD' => ['symbol' => '$', 'name' => 'US Dollar', 'position' => 'before'],
+            'EUR' => ['symbol' => '€', 'name' => 'Euro', 'position' => 'before'],
+            'GBP' => ['symbol' => '£', 'name' => 'British Pound', 'position' => 'before'],
+            'CAD' => ['symbol' => 'C$', 'name' => 'Canadian Dollar', 'position' => 'before'],
+            'AUD' => ['symbol' => 'A$', 'name' => 'Australian Dollar', 'position' => 'before'],
+            'JPY' => ['symbol' => '¥', 'name' => 'Japanese Yen', 'position' => 'before'],
+            'CHF' => ['symbol' => 'CHF', 'name' => 'Swiss Franc', 'position' => 'before'],
+            'INR' => ['symbol' => '₹', 'name' => 'Indian Rupee', 'position' => 'before'],
+            'CNY' => ['symbol' => '¥', 'name' => 'Chinese Yuan', 'position' => 'before'],
+            'BRL' => ['symbol' => 'R$', 'name' => 'Brazilian Real', 'position' => 'before'],
+            'MXN' => ['symbol' => 'MX$', 'name' => 'Mexican Peso', 'position' => 'before'],
+            'SEK' => ['symbol' => 'kr', 'name' => 'Swedish Krona', 'position' => 'after'],
+            'NOK' => ['symbol' => 'kr', 'name' => 'Norwegian Krone', 'position' => 'after'],
+            'DKK' => ['symbol' => 'kr', 'name' => 'Danish Krone', 'position' => 'after'],
+            'NZD' => ['symbol' => 'NZ$', 'name' => 'New Zealand Dollar', 'position' => 'before'],
+            'SGD' => ['symbol' => 'S$', 'name' => 'Singapore Dollar', 'position' => 'before'],
+            'HKD' => ['symbol' => 'HK$', 'name' => 'Hong Kong Dollar', 'position' => 'before'],
+            'ZAR' => ['symbol' => 'R', 'name' => 'South African Rand', 'position' => 'before'],
+            'PLN' => ['symbol' => 'zł', 'name' => 'Polish Zloty', 'position' => 'after'],
+            'KRW' => ['symbol' => '₩', 'name' => 'South Korean Won', 'position' => 'before'],
+        ];
+    }
+
+    /**
+     * Get the current currency code.
+     */
+    public static function currency(): string
+    {
+        return self::get(self::KEY_CURRENCY, self::DEFAULT_CURRENCY);
+    }
+
+    /**
+     * Get the currency symbol for the current or specified currency.
+     */
+    public static function currencySymbol(?string $currency = null): string
+    {
+        $currency = $currency ?? self::currency();
+        $currencies = self::supportedCurrencies();
+
+        return $currencies[$currency]['symbol'] ?? '$';
+    }
+
+    /**
+     * Format a value as currency.
+     */
+    public static function formatCurrency(float $value, ?string $currency = null, int $decimals = 2): string
+    {
+        $currency = $currency ?? self::currency();
+        $currencies = self::supportedCurrencies();
+        $config = $currencies[$currency] ?? $currencies[self::DEFAULT_CURRENCY];
+
+        $formatted = number_format(abs($value), $decimals);
+        $sign = $value < 0 ? '-' : '';
+
+        if ($config['position'] === 'after') {
+            return $sign.$formatted.' '.$config['symbol'];
+        }
+
+        return $sign.$config['symbol'].$formatted;
+    }
+
     public static function get(string $key, mixed $default = null): mixed
     {
         return Cache::remember("setting.{$key}", 3600, function () use ($key, $default) {

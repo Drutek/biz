@@ -3,6 +3,31 @@
 
     <x-settings.layout :heading="__('Business Profile')" :subheading="__('Describe your business to help the AI advisor provide more relevant advice')">
         <form wire:submit="save" class="my-6 w-full space-y-6">
+            <div class="rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-700 dark:bg-zinc-800/50">
+                <h3 class="mb-3 font-medium text-zinc-900 dark:text-white">Financial Information</h3>
+                <div class="space-y-4">
+                    <flux:select
+                        wire:model="currency"
+                        :label="__('Currency')"
+                        description="Currency used for all financial displays"
+                    >
+                        @foreach($this->currencyOptions as $code => $config)
+                            <flux:select.option value="{{ $code }}">{{ $config['symbol'] }} - {{ $config['name'] }} ({{ $code }})</flux:select.option>
+                        @endforeach
+                    </flux:select>
+
+                    <flux:input
+                        wire:model="cash_balance"
+                        :label="__('Current Cash Balance')"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="Enter your current bank balance"
+                        description="Used to calculate your runway (months until funds run out)"
+                    />
+                </div>
+            </div>
+
             <flux:input
                 wire:model="business_industry"
                 :label="__('Industry / Sector')"

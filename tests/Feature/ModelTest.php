@@ -200,4 +200,37 @@ describe('Setting Model', function () {
         expect(Setting::get('update_key'))->toBe('updated');
         expect(Setting::query()->where('key', 'update_key')->count())->toBe(1);
     });
+
+    it('has supported currencies', function () {
+        $currencies = Setting::supportedCurrencies();
+
+        expect($currencies)->toBeArray()
+            ->and($currencies)->toHaveKey('USD')
+            ->and($currencies)->toHaveKey('EUR')
+            ->and($currencies)->toHaveKey('GBP')
+            ->and($currencies['USD']['symbol'])->toBe('$')
+            ->and($currencies['EUR']['symbol'])->toBe('€');
+    });
+
+    it('returns default currency when not set', function () {
+        expect(Setting::currency())->toBe(Setting::DEFAULT_CURRENCY);
+    });
+
+    it('formats currency with symbol before amount', function () {
+        Setting::set(Setting::KEY_CURRENCY, 'USD');
+
+        expect(Setting::formatCurrency(1234.56))->toBe('$1,234.56')
+            ->and(Setting::formatCurrency(0))->toBe('$0.00')
+            ->and(Setting::formatCurrency(-500))->toBe('-$500.00');
+    });
+
+    it('formats currency with symbol after amount', function () {
+        expect(Setting::formatCurrency(1234.56, 'SEK'))->toBe('1,234.56 kr');
+    });
+
+    it('returns correct currency symbol', function () {
+        expect(Setting::currencySymbol('USD'))->toBe('$')
+            ->and(Setting::currencySymbol('EUR'))->toBe('€')
+            ->and(Setting::currencySymbol('GBP'))->toBe('£');
+    });
 });

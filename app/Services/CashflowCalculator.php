@@ -6,6 +6,7 @@ use App\Enums\BillingFrequency;
 use App\Enums\ContractStatus;
 use App\Models\Contract;
 use App\Models\Expense;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
@@ -35,22 +36,32 @@ class CashflowCalculator
             ->sum(fn (Contract $contract) => $contract->weightedMonthlyValue());
     }
 
+    public function cashBalance(): float
+    {
+        return (float) Setting::get(Setting::KEY_CASH_BALANCE, 0);
+    }
+
     public function runway(): float
     {
+        $cashBalance = $this->cashBalance();
         $monthlyIncome = $this->monthlyConfirmedIncome();
         $monthlyBurn = $this->monthlyBurn();
-
-        if ($monthlyBurn <= 0) {
-            return INF;
-        }
-
         $netMonthly = $monthlyIncome - $monthlyBurn;
 
+        // If making money or breaking even, runway is infinite
         if ($netMonthly >= 0) {
             return INF;
         }
 
-        return 0.0;
+        // If no cash balance set, can't calculate runway
+        if ($cashBalance <= 0) {
+            return 0.0;
+        }
+
+        // Runway = cash / monthly burn rate (net loss)
+        $monthlyNetBurn = abs($netMonthly);
+
+        return $cashBalance / $monthlyNetBurn;
     }
 
     /**
@@ -153,6 +164,7 @@ class CashflowCalculator
      * Get summary statistics for the dashboard.
      *
      * @return array{
+     *     cash_balance: float,
      *     monthly_income: float,
      *     monthly_expenses: float,
      *     monthly_pipeline: float,
@@ -167,6 +179,7 @@ class CashflowCalculator
         $pipeline = $this->monthlyPipelineIncome();
 
         return [
+            'cash_balance' => $this->cashBalance(),
             'monthly_income' => $income,
             'monthly_expenses' => $expenses,
             'monthly_pipeline' => $pipeline,

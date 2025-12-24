@@ -20,6 +20,13 @@
             </flux:navlist>
 
             <flux:navlist variant="outline">
+                <flux:navlist.group :heading="__('Intelligence')" class="grid">
+                    <flux:navlist.item icon="newspaper" :href="route('news.index')" :current="request()->routeIs('news.*')" wire:navigate>{{ __('News') }}</flux:navlist.item>
+                    <flux:navlist.item icon="building-office" :href="route('tracked-entities.index')" :current="request()->routeIs('tracked-entities.*')" wire:navigate>{{ __('Tracked Entities') }}</flux:navlist.item>
+                </flux:navlist.group>
+            </flux:navlist>
+
+            <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Activity')" class="grid">
                     <flux:navlist.item icon="sun" :href="route('standup.today')" :current="request()->routeIs('standup.*')" wire:navigate>{{ __("Today's Briefing") }}</flux:navlist.item>
                     <flux:navlist.item icon="calendar" :href="route('events.index')" :current="request()->routeIs('events.*')" wire:navigate>{{ __('Events') }}</flux:navlist.item>
@@ -39,16 +46,6 @@
             </flux:navlist>
 
             <flux:spacer />
-
-            <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
-            </flux:navlist>
 
             <!-- Desktop User Menu -->
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
@@ -151,5 +148,6 @@
         {{ $slot }}
 
         @fluxScripts
+        @stack('scripts')
     </body>
 </html>

@@ -8,7 +8,7 @@
         <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:text class="text-sm text-zinc-500">Monthly Income</flux:text>
             <div class="mt-1 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                {{ number_format($summary['monthly_income'], 2) }}
+                {{ \App\Models\Setting::formatCurrency($summary['monthly_income']) }}
             </div>
             <flux:text class="text-sm text-zinc-500">Confirmed contracts</flux:text>
         </div>
@@ -16,7 +16,7 @@
         <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:text class="text-sm text-zinc-500">Monthly Expenses</flux:text>
             <div class="mt-1 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-                {{ number_format($summary['monthly_expenses'], 2) }}
+                {{ \App\Models\Setting::formatCurrency($summary['monthly_expenses']) }}
             </div>
             <flux:text class="text-sm text-zinc-500">Recurring costs</flux:text>
         </div>
@@ -24,7 +24,7 @@
         <div class="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:text class="text-sm text-zinc-500">Monthly Net</flux:text>
             <div class="mt-1 text-2xl font-bold {{ $summary['monthly_net'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }}">
-                {{ $summary['monthly_net'] >= 0 ? '+' : '' }}{{ number_format($summary['monthly_net'], 2) }}
+                {{ $summary['monthly_net'] >= 0 ? '+' : '' }}{{ \App\Models\Setting::formatCurrency($summary['monthly_net']) }}
             </div>
             <flux:text class="text-sm text-zinc-500">Income - Expenses</flux:text>
         </div>
@@ -40,7 +40,7 @@
             </div>
             <flux:text class="text-sm text-zinc-500">
                 @if($summary['monthly_pipeline'] > 0)
-                    + {{ number_format($summary['monthly_pipeline'], 2) }} pipeline
+                    + {{ \App\Models\Setting::formatCurrency($summary['monthly_pipeline']) }} pipeline
                 @else
                     At current rate
                 @endif
@@ -64,7 +64,7 @@
                         <div class="flex items-center justify-between border-b border-zinc-100 pb-2 dark:border-zinc-800">
                             <div>
                                 <div class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $contract->name }}</div>
-                                <div class="text-xs text-zinc-500">{{ number_format($contract->monthlyValue(), 2) }}/mo</div>
+                                <div class="text-xs text-zinc-500">{{ \App\Models\Setting::formatCurrency($contract->monthlyValue()) }}/mo</div>
                             </div>
                             <flux:badge :color="$contract->end_date->diffInDays(now()) <= 30 ? 'red' : 'yellow'">
                                 {{ $contract->end_date->format('M j') }}
@@ -119,11 +119,11 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        function initCashflowChart() {
             const ctx = document.getElementById('cashflowChart');
-            if (ctx) {
+            if (ctx && !ctx.chart) {
                 const projections = @json($projections);
-                new Chart(ctx, {
+                ctx.chart = new Chart(ctx, {
                     type: 'bar',
                     data: {
                         labels: projections.map(p => p.month),
@@ -160,7 +160,13 @@
                     }
                 });
             }
-        });
+        }
+
+        // Initialize on first load
+        document.addEventListener('DOMContentLoaded', initCashflowChart);
+
+        // Reinitialize after Livewire navigation
+        document.addEventListener('livewire:navigated', initCashflowChart);
     </script>
     @endpush
 </div>

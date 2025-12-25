@@ -108,7 +108,7 @@ class User extends Authenticatable
 
     public function getOrCreatePreferences(): UserPreference
     {
-        return $this->preferences ?? $this->preferences()->create([]);
+        return $this->preferences ?? $this->preferences()->firstOrCreate([]);
     }
 
     public function unreadInsightsCount(): int

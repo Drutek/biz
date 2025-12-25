@@ -24,11 +24,18 @@ class SerpApiService
         }
 
         try {
-            $response = Http::timeout(30)->get(self::BASE_URL, [
+            $params = [
                 'engine' => 'google_news',
                 'q' => $entity->search_query,
                 'api_key' => $apiKey,
-            ]);
+            ];
+
+            $recency = Setting::get(Setting::KEY_NEWS_RECENCY, Setting::DEFAULT_NEWS_RECENCY);
+            if ($recency !== '') {
+                $params['tbs'] = "qdr:{$recency}";
+            }
+
+            $response = Http::timeout(30)->get(self::BASE_URL, $params);
 
             if (! $response->successful()) {
                 Log::error('SerpAPI request failed', [

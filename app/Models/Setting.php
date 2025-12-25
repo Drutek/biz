@@ -24,6 +24,26 @@ class Setting extends Model
 
     public const KEY_SERPAPI_KEY = 'serpapi_key';
 
+    public const KEY_NEWS_RECENCY = 'news_recency';
+
+    public const DEFAULT_NEWS_RECENCY = 'w';
+
+    /**
+     * Supported news recency options.
+     *
+     * @return array<string, array{label: string, description: string}>
+     */
+    public static function newsRecencyOptions(): array
+    {
+        return [
+            'h' => ['label' => 'Last hour', 'description' => 'Only show news from the past hour'],
+            'd' => ['label' => 'Last 24 hours', 'description' => 'Only show news from today'],
+            'w' => ['label' => 'Last week', 'description' => 'Only show news from the past 7 days'],
+            'm' => ['label' => 'Last month', 'description' => 'Only show news from the past 30 days'],
+            '' => ['label' => 'Any time', 'description' => 'Show all available news'],
+        ];
+    }
+
     public const KEY_COMPANY_NAME = 'company_name';
 
     public const KEY_FINANCIAL_YEAR_START = 'financial_year_start';

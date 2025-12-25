@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings;
 
 use App\Models\Setting;
+use Illuminate\Validation\Rule;
 use Livewire\Component;
 
 class ApiKeys extends Component
@@ -17,6 +18,8 @@ class ApiKeys extends Component
 
     public string $preferred_llm_provider = 'claude';
 
+    public string $news_recency = '';
+
     public function mount(): void
     {
         $this->company_name = Setting::get(Setting::KEY_COMPANY_NAME, '');
@@ -24,6 +27,15 @@ class ApiKeys extends Component
         $this->openai_api_key = Setting::get(Setting::KEY_OPENAI_API_KEY, '');
         $this->serpapi_key = Setting::get(Setting::KEY_SERPAPI_KEY, '');
         $this->preferred_llm_provider = Setting::get(Setting::KEY_PREFERRED_LLM_PROVIDER, 'claude');
+        $this->news_recency = Setting::get(Setting::KEY_NEWS_RECENCY, Setting::DEFAULT_NEWS_RECENCY);
+    }
+
+    /**
+     * @return array<string, array{label: string, description: string}>
+     */
+    public function getNewsRecencyOptionsProperty(): array
+    {
+        return Setting::newsRecencyOptions();
     }
 
     /**
@@ -37,6 +49,7 @@ class ApiKeys extends Component
             'openai_api_key' => 'nullable|string',
             'serpapi_key' => 'nullable|string',
             'preferred_llm_provider' => 'required|in:claude,openai',
+            'news_recency' => [Rule::in(['h', 'd', 'w', 'm', ''])],
         ];
     }
 
@@ -49,6 +62,7 @@ class ApiKeys extends Component
         Setting::set(Setting::KEY_OPENAI_API_KEY, $this->openai_api_key);
         Setting::set(Setting::KEY_SERPAPI_KEY, $this->serpapi_key);
         Setting::set(Setting::KEY_PREFERRED_LLM_PROVIDER, $this->preferred_llm_provider);
+        Setting::set(Setting::KEY_NEWS_RECENCY, $this->news_recency);
 
         $this->dispatch('settings-saved');
     }

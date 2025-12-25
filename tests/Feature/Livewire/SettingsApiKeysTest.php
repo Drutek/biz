@@ -64,4 +64,42 @@ describe('Settings API Keys', function () {
             ->call('save')
             ->assertHasErrors(['preferred_llm_provider']);
     });
+
+    it('loads default news recency setting', function () {
+        Livewire::test(ApiKeys::class)
+            ->assertSet('news_recency', Setting::DEFAULT_NEWS_RECENCY);
+    });
+
+    it('loads existing news recency setting', function () {
+        Setting::set(Setting::KEY_NEWS_RECENCY, 'd');
+
+        Livewire::test(ApiKeys::class)
+            ->assertSet('news_recency', 'd');
+    });
+
+    it('can save news recency setting', function () {
+        Livewire::test(ApiKeys::class)
+            ->set('news_recency', 'm')
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertDispatched('settings-saved');
+
+        expect(Setting::get(Setting::KEY_NEWS_RECENCY))->toBe('m');
+    });
+
+    it('can save empty news recency for any time', function () {
+        Livewire::test(ApiKeys::class)
+            ->set('news_recency', '')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        expect(Setting::get(Setting::KEY_NEWS_RECENCY))->toBe('');
+    });
+
+    it('validates news recency is valid option', function () {
+        Livewire::test(ApiKeys::class)
+            ->set('news_recency', 'invalid')
+            ->call('save')
+            ->assertHasErrors(['news_recency']);
+    });
 });

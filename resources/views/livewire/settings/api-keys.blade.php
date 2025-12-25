@@ -61,6 +61,20 @@
                 />
             </div>
 
+            <flux:separator />
+
+            <div class="space-y-4">
+                <flux:heading size="sm">News Settings</flux:heading>
+
+                <flux:select wire:model="news_recency" :label="__('News Recency')">
+                    @foreach($this->newsRecencyOptions as $value => $option)
+                        <flux:select.option :value="$value">{{ $option['label'] }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+                <flux:description>Controls how recent the fetched news articles should be.</flux:description>
+                <flux:error name="news_recency" />
+            </div>
+
             <div class="flex items-center gap-4">
                 <flux:button variant="primary" type="submit">{{ __('Save Settings') }}</flux:button>
 

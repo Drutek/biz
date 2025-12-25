@@ -6,6 +6,7 @@ use App\Enums\InsightPriority;
 use App\Enums\InsightType;
 use App\Enums\LLMProvider;
 use App\Enums\TriggerType;
+use App\Traits\HasEmbedding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ProactiveInsight extends Model
 {
     /** @use HasFactory<\Database\Factories\ProactiveInsightFactory> */
+    use HasEmbedding;
+
     use HasFactory;
 
     protected $fillable = [
@@ -30,6 +33,7 @@ class ProactiveInsight extends Model
         'provider',
         'model',
         'tokens_used',
+        'is_embedded',
     ];
 
     /**
@@ -46,7 +50,16 @@ class ProactiveInsight extends Model
             'is_dismissed' => 'boolean',
             'provider' => LLMProvider::class,
             'tokens_used' => 'integer',
+            'is_embedded' => 'boolean',
         ];
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function getEmbeddableColumns(): array
+    {
+        return ['title', 'content'];
     }
 
     /**

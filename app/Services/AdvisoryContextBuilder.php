@@ -9,9 +9,15 @@ use App\Models\Expense;
 use App\Models\NewsItem;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\Embedding\VectorSearchService;
+use Illuminate\Support\Str;
 
 class AdvisoryContextBuilder
 {
+    public function __construct(
+        protected ?VectorSearchService $vectorSearch = null
+    ) {}
+
     public function build(?User $user = null): string
     {
         $companyName = Setting::get(Setting::KEY_COMPANY_NAME, 'Your Business');
@@ -51,6 +57,114 @@ Provide strategic advice based on this context. Be direct, practical, and specif
 EOT;
 
         return $context;
+    }
+
+    /**
+     * Build context with RAG-enhanced historical data.
+     *
+     * This method retrieves semantically relevant past conversations,
+     * events, and insights to provide better context for the LLM.
+     */
+    public function buildWithRAG(?User $user = null, ?string $currentQuery = null): string
+    {
+        $baseContext = $this->build($user);
+
+        if (! $user || ! $currentQuery || ! $this->vectorSearch) {
+            return $baseContext;
+        }
+
+        $relevantHistory = $this->getRelevantHistory($user, $currentQuery);
+
+        if (empty($relevantHistory)) {
+            return $baseContext;
+        }
+
+        return $baseContext."\n\nRELEVANT HISTORICAL CONTEXT:\n".$relevantHistory;
+    }
+
+    /**
+     * Retrieve semantically relevant historical data for the given query.
+     */
+    protected function getRelevantHistory(User $user, string $query): string
+    {
+        if (! $this->vectorSearch) {
+            return '';
+        }
+
+        $context = $this->vectorSearch->getRelevantContext(
+            userId: $user->id,
+            query: $query,
+            messagesLimit: 5,
+            eventsLimit: 3,
+            insightsLimit: 3
+        );
+
+        $sections = [];
+
+        if ($context['messages']->isNotEmpty()) {
+            $sections[] = $this->formatRelevantMessages($context['messages']);
+        }
+
+        if ($context['events']->isNotEmpty()) {
+            $sections[] = $this->formatRelevantEvents($context['events']);
+        }
+
+        if ($context['insights']->isNotEmpty()) {
+            $sections[] = $this->formatRelevantInsights($context['insights']);
+        }
+
+        return implode("\n\n", $sections);
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, object>  $messages
+     */
+    protected function formatRelevantMessages(\Illuminate\Support\Collection $messages): string
+    {
+        $lines = ['Similar Past Conversations:'];
+
+        foreach ($messages as $message) {
+            $date = \Carbon\Carbon::parse($message->created_at)->format('M j, Y');
+            $role = ucfirst($message->role);
+            $preview = Str::limit($message->content, 200);
+            $lines[] = "  [{$date}] [{$role}] {$preview}";
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, object>  $events
+     */
+    protected function formatRelevantEvents(\Illuminate\Support\Collection $events): string
+    {
+        $lines = ['Similar Past Events:'];
+
+        foreach ($events as $event) {
+            $date = \Carbon\Carbon::parse($event->occurred_at)->format('M j, Y');
+            $lines[] = "  [{$date}] {$event->title}";
+            if ($event->description) {
+                $lines[] = '    '.Str::limit($event->description, 150);
+            }
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, object>  $insights
+     */
+    protected function formatRelevantInsights(\Illuminate\Support\Collection $insights): string
+    {
+        $lines = ['Related Past Insights:'];
+
+        foreach ($insights as $insight) {
+            $date = \Carbon\Carbon::parse($insight->created_at)->format('M j, Y');
+            $lines[] = "  [{$date}] {$insight->title}";
+            $lines[] = '    '.Str::limit($insight->content, 150);
+        }
+
+        return implode("\n", $lines);
     }
 
     /**

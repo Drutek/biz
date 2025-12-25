@@ -4,6 +4,7 @@ namespace App\Livewire\Advisor;
 
 use App\Models\AdvisoryThread;
 use App\Services\AdvisoryContextBuilder;
+use App\Services\Embedding\VectorSearchService;
 use App\Services\LLM\LLMManager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -99,8 +100,11 @@ class Chat extends Component
         $this->message = '';
 
         try {
-            $contextBuilder = new AdvisoryContextBuilder;
-            $systemPrompt = $contextBuilder->build();
+            $vectorSearch = app(VectorSearchService::class);
+            $contextBuilder = new AdvisoryContextBuilder($vectorSearch);
+
+            $userMessage = $thread->messages()->latest()->first()?->content ?? '';
+            $systemPrompt = $contextBuilder->buildWithRAG(Auth::user(), $userMessage);
 
             $messages = $thread->messages()
                 ->orderBy('created_at')

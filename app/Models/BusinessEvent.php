@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\EventCategory;
 use App\Enums\EventSignificance;
 use App\Enums\EventType;
+use App\Traits\HasEmbedding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class BusinessEvent extends Model
 {
     /** @use HasFactory<\Database\Factories\BusinessEventFactory> */
+    use HasEmbedding;
+
     use HasFactory;
 
     protected $fillable = [
@@ -27,6 +30,7 @@ class BusinessEvent extends Model
         'eventable_type',
         'eventable_id',
         'occurred_at',
+        'is_embedded',
     ];
 
     /**
@@ -40,7 +44,16 @@ class BusinessEvent extends Model
             'significance' => EventSignificance::class,
             'metadata' => 'array',
             'occurred_at' => 'datetime',
+            'is_embedded' => 'boolean',
         ];
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function getEmbeddableColumns(): array
+    {
+        return ['title', 'description'];
     }
 
     /**

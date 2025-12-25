@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\LLMProvider;
 use App\Enums\MessageRole;
+use App\Traits\HasEmbedding;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AdvisoryMessage extends Model
 {
     /** @use HasFactory<\Database\Factories\AdvisoryMessageFactory> */
+    use HasEmbedding;
+
     use HasFactory;
 
     protected $fillable = [
@@ -20,6 +23,7 @@ class AdvisoryMessage extends Model
         'provider',
         'model',
         'tokens_used',
+        'is_embedded',
     ];
 
     /**
@@ -31,7 +35,16 @@ class AdvisoryMessage extends Model
             'role' => MessageRole::class,
             'provider' => LLMProvider::class,
             'tokens_used' => 'integer',
+            'is_embedded' => 'boolean',
         ];
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function getEmbeddableColumns(): array
+    {
+        return ['content'];
     }
 
     /**

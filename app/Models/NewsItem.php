@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasEmbedding;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class NewsItem extends Model
 {
     /** @use HasFactory<\Database\Factories\NewsItemFactory> */
+    use HasEmbedding;
+
     use HasFactory;
 
     protected $fillable = [
@@ -22,6 +25,7 @@ class NewsItem extends Model
         'fetched_at',
         'is_read',
         'is_relevant',
+        'is_embedded',
     ];
 
     /**
@@ -34,7 +38,16 @@ class NewsItem extends Model
             'fetched_at' => 'datetime',
             'is_read' => 'boolean',
             'is_relevant' => 'boolean',
+            'is_embedded' => 'boolean',
         ];
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function getEmbeddableColumns(): array
+    {
+        return ['title', 'snippet'];
     }
 
     /**

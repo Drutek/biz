@@ -10,15 +10,19 @@ use App\Enums\TriggerType;
 use App\Models\BusinessEvent;
 use App\Models\ProactiveInsight;
 use App\Models\User;
+use App\Services\Embedding\VectorSearchService;
 use App\Services\LLM\LLMManager;
 use App\Services\LLM\LLMResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ProactiveAdvisor
 {
     public function __construct(
         protected LLMManager $llmManager,
-        protected AdvisoryContextBuilder $contextBuilder
+        protected AdvisoryContextBuilder $contextBuilder,
+        protected ?VectorSearchService $vectorSearch = null
     ) {}
 
     public function generateDailyAnalysis(User $user): ?ProactiveInsight
@@ -118,7 +122,8 @@ EOT;
         $user = $event->user;
         $context = $this->contextBuilder->build();
 
-        $prompt = $this->buildEventPrompt($event);
+        $similarEvents = $this->findSimilarPastEvents($event);
+        $prompt = $this->buildEventPromptWithHistory($event, $similarEvents);
 
         try {
             $response = $this->llmManager->driver()->chat(
@@ -425,5 +430,55 @@ EOT;
         }
 
         return false;
+    }
+
+    /**
+     * Find similar past events using vector search.
+     *
+     * @return Collection<int, object>
+     */
+    protected function findSimilarPastEvents(BusinessEvent $event): Collection
+    {
+        if (! $this->vectorSearch) {
+            return collect();
+        }
+
+        $eventText = $event->title."\n".($event->description ?? '');
+
+        return $this->vectorSearch->findSimilarEvents(
+            userId: $event->user_id,
+            eventDescription: $eventText,
+            limit: 3,
+            threshold: 0.4,
+            excludeEventId: $event->id
+        );
+    }
+
+    /**
+     * Build event analysis prompt with historical context.
+     *
+     * @param  Collection<int, object>  $similarEvents
+     */
+    protected function buildEventPromptWithHistory(BusinessEvent $event, Collection $similarEvents): string
+    {
+        $basePrompt = $this->buildEventPrompt($event);
+
+        if ($similarEvents->isEmpty()) {
+            return $basePrompt;
+        }
+
+        $historySection = "\n\nSIMILAR PAST EVENTS FOR CONTEXT:\n";
+
+        foreach ($similarEvents as $pastEvent) {
+            $date = \Carbon\Carbon::parse($pastEvent->occurred_at)->format('M j, Y');
+            $historySection .= "  [{$date}] {$pastEvent->title}\n";
+            if ($pastEvent->description) {
+                $historySection .= '    '.Str::limit($pastEvent->description, 150)."\n";
+            }
+        }
+
+        $historySection .= "\nConsider what happened after these similar events when providing your analysis and recommendations.";
+
+        return $basePrompt.$historySection;
     }
 }

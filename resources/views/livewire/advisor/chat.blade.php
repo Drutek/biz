@@ -3,7 +3,14 @@
     <div class="w-64 shrink-0 overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800">
         <div class="flex items-center justify-between border-b border-zinc-200 p-4 dark:border-zinc-700">
             <flux:heading size="sm">Conversations</flux:heading>
-            <flux:button size="sm" variant="primary" wire:click="newThread">New</flux:button>
+            <div class="flex items-center gap-1">
+                <flux:modal.trigger name="semantic-search">
+                    <flux:button size="sm" variant="ghost" title="Search conversations">
+                        <flux:icon name="magnifying-glass" class="h-4 w-4" />
+                    </flux:button>
+                </flux:modal.trigger>
+                <flux:button size="sm" variant="primary" wire:click="newThread">New</flux:button>
+            </div>
         </div>
         <div class="h-full overflow-y-auto p-2">
             @forelse($threads as $thread)
@@ -108,4 +115,24 @@
             </div>
         @endif
     </div>
+
+    {{-- Semantic Search Modal --}}
+    <flux:modal name="semantic-search" class="max-w-2xl">
+        <div class="p-6">
+            <flux:heading size="lg" class="mb-4">Search Conversations</flux:heading>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
+                Search your past conversations by meaning, not just keywords.
+            </p>
+            <livewire:advisor.semantic-search />
+        </div>
+    </flux:modal>
 </div>
+
+@script
+<script>
+    $wire.on('navigate-to-thread', (event) => {
+        $wire.selectThread(event.threadId);
+        Flux.close('semantic-search');
+    });
+</script>
+@endscript

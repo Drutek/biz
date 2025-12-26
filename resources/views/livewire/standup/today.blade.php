@@ -107,8 +107,8 @@
         @if($standup->ai_summary)
             <div class="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800">
                 <h3 class="mb-4 font-semibold text-zinc-900 dark:text-white">AI Summary</h3>
-                <div class="prose prose-sm max-w-none dark:prose-invert">
-                    {!! nl2br(e($standup->ai_summary)) !!}
+                <div class="prose prose-sm prose-zinc max-w-none dark:prose-invert">
+                    {!! Str::markdown($standup->ai_summary) !!}
                 </div>
             </div>
         @endif
@@ -117,14 +117,16 @@
         @if($standup->ai_insights && count($standup->ai_insights) > 0)
             <div class="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-700 dark:bg-zinc-800">
                 <h3 class="mb-4 font-semibold text-zinc-900 dark:text-white">Today's Insights</h3>
-                <ul class="space-y-3">
+                <div class="space-y-4">
                     @foreach($standup->ai_insights as $insight)
-                        <li class="flex items-start gap-3">
+                        <div class="flex items-start gap-3">
                             <flux:icon.light-bulb class="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
-                            <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $insight }}</span>
-                        </li>
+                            <div class="prose prose-sm prose-zinc max-w-none dark:prose-invert">
+                                {!! Str::markdown($insight) !!}
+                            </div>
+                        </div>
                     @endforeach
-                </ul>
+                </div>
             </div>
         @endif
     @else

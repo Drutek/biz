@@ -128,9 +128,9 @@
                     @if($selectedStandup->ai_summary)
                         <div class="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-800">
                             <h4 class="mb-3 font-medium text-zinc-900 dark:text-white">AI Summary</h4>
-                            <p class="text-sm text-zinc-700 dark:text-zinc-300">
-                                {!! nl2br(e($selectedStandup->ai_summary)) !!}
-                            </p>
+                            <div class="prose prose-sm prose-zinc max-w-none dark:prose-invert">
+                                {!! Str::markdown($selectedStandup->ai_summary) !!}
+                            </div>
                         </div>
                     @endif
                 </div>

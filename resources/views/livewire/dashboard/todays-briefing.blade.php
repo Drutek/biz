@@ -65,7 +65,7 @@
             {{-- AI Summary Preview --}}
             @if($standup->ai_summary)
                 <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                    {{ Str::limit($standup->ai_summary, 200) }}
+                    {{ Str::of($standup->ai_summary)->markdown()->stripTags()->squish()->limit(200) }}
                 </div>
             @endif
         </div>

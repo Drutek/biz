@@ -71,7 +71,7 @@
                                 <flux:icon.sparkles class="mt-1 h-6 w-6 {{ $iconClass }}" />
                         @endswitch
 
-                        <div class="min-w-0 flex-1">
+                        <div class="min-w-0 flex-1" x-data="{ expanded: false }">
                             <div class="flex items-center gap-2">
                                 <h4 class="font-medium text-zinc-900 dark:text-white">
                                     {{ $insight->title }}
@@ -80,9 +80,20 @@
                                     <span class="h-2 w-2 rounded-full bg-blue-500"></span>
                                 @endif
                             </div>
-                            <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-                                {{ Str::limit($insight->content, 300) }}
-                            </p>
+                            <div x-show="!expanded" class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                                {{ Str::of($insight->content)->markdown()->stripTags()->squish()->limit(300) }}
+                                @if(strlen($insight->content) > 300)
+                                    <button @click="expanded = true" class="ml-1 text-blue-500 hover:text-blue-600 dark:text-blue-400">
+                                        Show more
+                                    </button>
+                                @endif
+                            </div>
+                            <div x-show="expanded" x-collapse class="mt-1 prose prose-sm prose-zinc dark:prose-invert max-w-none">
+                                {!! Str::markdown($insight->content) !!}
+                                <button @click="expanded = false" class="mt-2 text-sm text-blue-500 hover:text-blue-600 dark:text-blue-400">
+                                    Show less
+                                </button>
+                            </div>
                             <div class="mt-2 flex items-center gap-3">
                                 <flux:badge size="sm" :color="match($insight->priority->value) {
                                     'urgent' => 'red',

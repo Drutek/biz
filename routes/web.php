@@ -15,6 +15,7 @@ use App\Livewire\Settings\BusinessProfile;
 use App\Livewire\Settings\Notifications;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
+use App\Livewire\Settings\TaskIntegrations;
 use App\Livewire\Settings\TwoFactor;
 use App\Livewire\Standup\Archive as StandupArchive;
 use App\Livewire\Standup\Today as StandupToday;
@@ -54,6 +55,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/api-keys', ApiKeys::class)->name('settings.api-keys');
     Route::get('settings/business-profile', BusinessProfile::class)->name('settings.business-profile');
     Route::get('settings/notifications', Notifications::class)->name('settings.notifications');
+    Route::get('settings/integrations', TaskIntegrations::class)->name('settings.integrations');
 
     Route::get('settings/two-factor', TwoFactor::class)
         ->middleware(

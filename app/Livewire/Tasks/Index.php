@@ -4,6 +4,7 @@ namespace App\Livewire\Tasks;
 
 use App\Enums\TaskStatus;
 use App\Models\Task;
+use App\Services\TaskIntegration\TaskIntegrationManager;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -13,6 +14,10 @@ use Livewire\Component;
 class Index extends Component
 {
     public string $statusFilter = 'active';
+
+    public ?string $exportError = null;
+
+    public ?string $exportSuccess = null;
 
     public function mount(): void
     {
@@ -40,6 +45,37 @@ class Index extends Component
     {
         $task = Task::where('user_id', Auth::id())->findOrFail($taskId);
         $task->cancel();
+    }
+
+    public function exportTask(int $taskId, TaskIntegrationManager $manager): void
+    {
+        $this->exportError = null;
+        $this->exportSuccess = null;
+
+        $task = Task::where('user_id', Auth::id())->findOrFail($taskId);
+
+        $result = $manager->exportTask($task);
+
+        if ($result->success) {
+            $providerName = $manager->getActiveProviderName(Auth::user());
+            $this->exportSuccess = "Task exported to {$providerName}";
+        } else {
+            $this->exportError = $result->error;
+        }
+    }
+
+    public function hasIntegration(): bool
+    {
+        $manager = app(TaskIntegrationManager::class);
+
+        return $manager->hasConfiguredIntegration(Auth::user());
+    }
+
+    public function getIntegrationName(): ?string
+    {
+        $manager = app(TaskIntegrationManager::class);
+
+        return $manager->getActiveProviderName(Auth::user());
     }
 
     public function render(): View
@@ -80,6 +116,8 @@ class Index extends Component
         return view('livewire.tasks.index', [
             'tasks' => $tasks,
             'counts' => $counts,
+            'hasIntegration' => $this->hasIntegration(),
+            'integrationName' => $this->getIntegrationName(),
         ]);
     }
 }

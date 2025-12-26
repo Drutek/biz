@@ -29,6 +29,7 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Activity')" class="grid">
                     <flux:navlist.item icon="sun" :href="route('standup.today')" :current="request()->routeIs('standup.*')" wire:navigate>{{ __("Today's Briefing") }}</flux:navlist.item>
+                    <flux:navlist.item icon="clipboard-document-list" :href="route('tasks.index')" :current="request()->routeIs('tasks.*')" wire:navigate>{{ __('Tasks') }}</flux:navlist.item>
                     <flux:navlist.item icon="calendar" :href="route('events.index')" :current="request()->routeIs('events.*')" wire:navigate>{{ __('Events') }}</flux:navlist.item>
                     <flux:navlist.item icon="light-bulb" :href="route('insights.index')" :current="request()->routeIs('insights.*')" wire:navigate>
                         {{ __('Insights') }}

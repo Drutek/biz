@@ -6,7 +6,35 @@
                 Manage your suggested and active tasks
             </p>
         </div>
+        @if($hasIntegration)
+            <flux:badge color="green" size="sm">
+                <flux:icon.link class="h-3 w-3 mr-1" />
+                {{ $integrationName }} connected
+            </flux:badge>
+        @else
+            <a href="{{ route('settings.integrations') }}" wire:navigate>
+                <flux:button size="sm" variant="ghost">
+                    <flux:icon.link class="h-4 w-4 mr-1" />
+                    Connect task manager
+                </flux:button>
+            </a>
+        @endif
     </div>
+
+    {{-- Export Messages --}}
+    @if($exportSuccess)
+        <flux:callout variant="success" class="flex items-center justify-between">
+            <span>{{ $exportSuccess }}</span>
+            <flux:button size="sm" variant="ghost" wire:click="$set('exportSuccess', null)">Dismiss</flux:button>
+        </flux:callout>
+    @endif
+
+    @if($exportError)
+        <flux:callout variant="danger" class="flex items-center justify-between">
+            <span>{{ $exportError }}</span>
+            <flux:button size="sm" variant="ghost" wire:click="$set('exportError', null)">Dismiss</flux:button>
+        </flux:callout>
+    @endif
 
     {{-- Filter Tabs --}}
     <div class="flex gap-2">
@@ -94,6 +122,26 @@
                                     <flux:button size="sm" variant="primary" wire:click="completeTask({{ $task->id }})">
                                         Complete
                                     </flux:button>
+                                @endif
+                                @if($hasIntegration && !$task->isExported() && $task->status->isActionable())
+                                    <flux:button size="sm" variant="ghost" wire:click="exportTask({{ $task->id }})" wire:loading.attr="disabled">
+                                        <flux:icon.arrow-up-tray class="h-4 w-4 mr-1" />
+                                        <span wire:loading.remove wire:target="exportTask({{ $task->id }})">Export</span>
+                                        <span wire:loading wire:target="exportTask({{ $task->id }})">...</span>
+                                    </flux:button>
+                                @elseif($task->isExported())
+                                    @if($task->getExternalUrl())
+                                        <a href="{{ $task->getExternalUrl() }}" target="_blank" rel="noopener noreferrer">
+                                            <flux:button size="sm" variant="ghost">
+                                                <flux:icon.arrow-top-right-on-square class="h-4 w-4 mr-1" />
+                                                View in {{ ucfirst($task->getExportedProvider()) }}
+                                            </flux:button>
+                                        </a>
+                                    @else
+                                        <flux:badge size="sm" color="zinc">
+                                            Exported to {{ ucfirst($task->getExportedProvider()) }}
+                                        </flux:badge>
+                                    @endif
                                 @endif
                                 @if($task->status->isActionable())
                                     <flux:button size="sm" variant="ghost" wire:click="cancelTask({{ $task->id }})">

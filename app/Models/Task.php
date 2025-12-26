@@ -204,4 +204,36 @@ class Task extends Model
 
         return (int) $this->due_date->diffInDays(now());
     }
+
+    /**
+     * Check if this task has been exported to an external system.
+     */
+    public function isExported(): bool
+    {
+        return isset($this->metadata['external_task']['external_id']);
+    }
+
+    /**
+     * Get the external task URL if exported.
+     */
+    public function getExternalUrl(): ?string
+    {
+        return $this->metadata['external_task']['url'] ?? null;
+    }
+
+    /**
+     * Get the provider key this task was exported to.
+     */
+    public function getExportedProvider(): ?string
+    {
+        return $this->metadata['external_task']['provider'] ?? null;
+    }
+
+    /**
+     * Get the external task ID if exported.
+     */
+    public function getExternalId(): ?string
+    {
+        return $this->metadata['external_task']['external_id'] ?? null;
+    }
 }

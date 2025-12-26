@@ -9,6 +9,8 @@
             <flux:navlist.item :href="route('appearance.edit')" wire:navigate>{{ __('Appearance') }}</flux:navlist.item>
             <flux:navlist.item :href="route('settings.business-profile')" wire:navigate>{{ __('Business Profile') }}</flux:navlist.item>
             <flux:navlist.item :href="route('settings.api-keys')" wire:navigate>{{ __('API Keys') }}</flux:navlist.item>
+            <flux:navlist.item :href="route('settings.notifications')" wire:navigate>{{ __('Notifications') }}</flux:navlist.item>
+            <flux:navlist.item :href="route('settings.integrations')" wire:navigate>{{ __('Integrations') }}</flux:navlist.item>
         </flux:navlist>
     </div>
 

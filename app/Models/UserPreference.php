@@ -25,6 +25,8 @@ class UserPreference extends Model
         'overdue_reminders_enabled',
         'overdue_reminder_time',
         'interactive_standup_enabled',
+        'task_integration_provider',
+        'task_integration_config',
     ];
 
     /**
@@ -41,7 +43,22 @@ class UserPreference extends Model
             'task_suggestions_enabled' => 'boolean',
             'overdue_reminders_enabled' => 'boolean',
             'interactive_standup_enabled' => 'boolean',
+            'task_integration_config' => 'array',
         ];
+    }
+
+    public function hasTaskIntegration(): bool
+    {
+        return $this->task_integration_provider !== null
+            && ! empty($this->task_integration_config);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getTaskIntegrationConfig(): array
+    {
+        return $this->task_integration_config ?? [];
     }
 
     /**

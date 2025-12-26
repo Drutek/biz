@@ -58,9 +58,13 @@ describe('Advisor Chat', function () {
         );
 
         $mockProvider = mock(\App\Services\LLM\LLMProvider::class);
-        $mockProvider->shouldReceive('chat')
+        $mockProvider->shouldReceive('chatStream')
             ->once()
-            ->andReturn($mockResponse);
+            ->andReturnUsing(function ($messages, $callback, $system) use ($mockResponse) {
+                $callback('Based on your finances...');
+
+                return $mockResponse;
+            });
 
         $mockManager = mock(LLMManager::class);
         $mockManager->shouldReceive('driver')
@@ -74,6 +78,9 @@ describe('Advisor Chat', function () {
             ->set('message', 'What is my runway?')
             ->call('sendMessage')
             ->assertSee('What is my runway?')
+            ->assertSet('isStreaming', true)
+            ->call('streamResponse')
+            ->assertSet('isStreaming', false)
             ->assertSee('Based on your finances...');
     });
 

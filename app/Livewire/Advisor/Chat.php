@@ -18,6 +18,10 @@ class Chat extends Component
 
     public string $message = '';
 
+    public bool $isStreaming = false;
+
+    public string $streamingResponse = '';
+
     /**
      * @return array<string, mixed>
      */
@@ -63,6 +67,8 @@ class Chat extends Component
 
         if ($thread) {
             $this->currentThreadId = $thread->id;
+            $this->isStreaming = false;
+            $this->streamingResponse = '';
         }
     }
 
@@ -98,6 +104,21 @@ class Chat extends Component
         }
 
         $this->message = '';
+        $this->isStreaming = true;
+        $this->streamingResponse = '';
+
+        $this->js('$wire.streamResponse()');
+    }
+
+    public function streamResponse(): void
+    {
+        if (! $this->currentThreadId) {
+            return;
+        }
+
+        $thread = AdvisoryThread::with('messages')
+            ->where('user_id', Auth::id())
+            ->findOrFail($this->currentThreadId);
 
         try {
             $vectorSearch = app(VectorSearchService::class);
@@ -116,7 +137,13 @@ class Chat extends Component
                 ->toArray();
 
             $llmManager = app(LLMManager::class);
-            $response = $llmManager->driver()->chat($messages, $systemPrompt);
+            $response = $llmManager->driver()->chatStream(
+                $messages,
+                function (string $chunk) {
+                    $this->stream('streamingResponse', $chunk);
+                },
+                $systemPrompt
+            );
 
             $thread->addAssistantMessage(
                 $response->content,
@@ -128,6 +155,9 @@ class Chat extends Component
             $thread->update([
                 'context_snapshot' => $contextBuilder->snapshot(),
             ]);
+
+            $this->isStreaming = false;
+            $this->streamingResponse = '';
         } catch (\Exception $e) {
             $thread->messages()->create([
                 'role' => 'assistant',
@@ -136,6 +166,9 @@ class Chat extends Component
                 'model' => null,
                 'tokens_used' => null,
             ]);
+
+            $this->isStreaming = false;
+            $this->streamingResponse = '';
         }
     }
 }

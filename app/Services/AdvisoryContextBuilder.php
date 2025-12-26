@@ -33,6 +33,8 @@ You are a strategic business advisor for {$companyName}. You have access to thei
 {$businessProfile}
 FINANCIAL POSITION AS OF {$this->formatDate(now())}:
 
+Cash Balance: {$this->formatCurrency($summary['cash_balance'])}
+
 Confirmed Monthly Income: {$this->formatCurrency($summary['monthly_income'])}
 {$this->formatContracts(ContractStatus::Confirmed)}
 
@@ -181,6 +183,7 @@ EOT;
             'company_name' => Setting::get(Setting::KEY_COMPANY_NAME, 'Your Business'),
             'business_industry' => Setting::get(Setting::KEY_BUSINESS_INDUSTRY, ''),
             'business_description' => Setting::get(Setting::KEY_BUSINESS_DESCRIPTION, ''),
+            'cash_balance' => $summary['cash_balance'],
             'monthly_income' => $summary['monthly_income'],
             'monthly_expenses' => $summary['monthly_expenses'],
             'monthly_pipeline' => $summary['monthly_pipeline'],

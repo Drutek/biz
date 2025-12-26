@@ -34,6 +34,7 @@ class VectorSearchService
             ->join('advisory_threads', 'advisory_messages.advisory_thread_id', '=', 'advisory_threads.id')
             ->where('advisory_threads.user_id', $userId)
             ->whereNotNull('advisory_messages.embedding')
+            ->whereRaw('(advisory_messages.embedding <=> ?) < ?', [$vectorString, $threshold])
             ->selectRaw(
                 'advisory_messages.id,
                  advisory_messages.content,
@@ -44,7 +45,6 @@ class VectorSearchService
                  (advisory_messages.embedding <=> ?) as distance',
                 [$vectorString]
             )
-            ->having('distance', '<', $threshold)
             ->orderBy('distance')
             ->limit($limit)
             ->get();
@@ -72,11 +72,11 @@ class VectorSearchService
         return DB::table('news_items')
             ->whereNotNull('embedding')
             ->when($daysBack, fn ($q) => $q->where('fetched_at', '>=', now()->subDays($daysBack)))
+            ->whereRaw('(embedding <=> ?) < ?', [$vectorString, $threshold])
             ->selectRaw(
                 'id, title, snippet, url, source, tracked_entity_id, published_at, fetched_at, (embedding <=> ?) as distance',
                 [$vectorString]
             )
-            ->having('distance', '<', $threshold)
             ->orderBy('distance')
             ->limit($limit)
             ->get();
@@ -106,11 +106,11 @@ class VectorSearchService
             ->where('user_id', $userId)
             ->whereNotNull('embedding')
             ->when($excludeEventId, fn ($q) => $q->where('id', '!=', $excludeEventId))
+            ->whereRaw('(embedding <=> ?) < ?', [$vectorString, $threshold])
             ->selectRaw(
                 'id, title, description, event_type, category, significance, occurred_at, metadata, (embedding <=> ?) as distance',
                 [$vectorString]
             )
-            ->having('distance', '<', $threshold)
             ->orderBy('distance')
             ->limit($limit)
             ->get();
@@ -140,11 +140,11 @@ class VectorSearchService
             ->where('user_id', $userId)
             ->whereNotNull('embedding')
             ->when($daysBack, fn ($q) => $q->where('created_at', '>=', now()->subDays($daysBack)))
+            ->whereRaw('(embedding <=> ?) < ?', [$vectorString, $threshold])
             ->selectRaw(
                 'id, title, content, insight_type, priority, created_at, (embedding <=> ?) as distance',
                 [$vectorString]
             )
-            ->having('distance', '<', $threshold)
             ->orderBy('distance')
             ->limit($limit)
             ->get();

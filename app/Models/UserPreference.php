@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,6 +20,11 @@ class UserPreference extends Model
         'in_app_notifications_enabled',
         'proactive_insights_enabled',
         'runway_alert_threshold',
+        'weekends_are_workdays',
+        'task_suggestions_enabled',
+        'overdue_reminders_enabled',
+        'overdue_reminder_time',
+        'interactive_standup_enabled',
     ];
 
     /**
@@ -31,6 +37,10 @@ class UserPreference extends Model
             'in_app_notifications_enabled' => 'boolean',
             'proactive_insights_enabled' => 'boolean',
             'runway_alert_threshold' => 'integer',
+            'weekends_are_workdays' => 'boolean',
+            'task_suggestions_enabled' => 'boolean',
+            'overdue_reminders_enabled' => 'boolean',
+            'interactive_standup_enabled' => 'boolean',
         ];
     }
 
@@ -61,5 +71,32 @@ class UserPreference extends Model
         }
 
         return $runwayMonths <= $this->runway_alert_threshold;
+    }
+
+    public function isWorkDay(?Carbon $date = null): bool
+    {
+        $date = $date ?? now();
+        $dayOfWeek = $date->dayOfWeek;
+
+        // Saturday = 6, Sunday = 0
+        $isWeekend = in_array($dayOfWeek, [0, 6]);
+
+        return ! $isWeekend || $this->weekends_are_workdays;
+    }
+
+    public function shouldSendOverdueReminderAt(Carbon $time): bool
+    {
+        if (! $this->overdue_reminders_enabled) {
+            return false;
+        }
+
+        if (! $this->isWorkDay($time)) {
+            return false;
+        }
+
+        $userTime = $time->copy()->setTimezone($this->standup_email_timezone);
+        $scheduledTime = Carbon::parse($this->overdue_reminder_time, $this->standup_email_timezone);
+
+        return $userTime->format('H:i') === $scheduledTime->format('H:i');
     }
 }

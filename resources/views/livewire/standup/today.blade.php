@@ -4,15 +4,52 @@
             <flux:heading size="xl">Today's Briefing</flux:heading>
             <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
                 {{ now()->format('l, F j, Y') }}
+                @if(!$isWorkDay)
+                    <flux:badge size="sm" color="zinc" class="ml-2">Weekend</flux:badge>
+                @endif
             </p>
         </div>
-        <a href="{{ route('standup.archive') }}" wire:navigate>
-            <flux:button variant="ghost" size="sm">
-                <flux:icon.archive-box class="mr-1 h-4 w-4" />
-                View Archive
-            </flux:button>
-        </a>
+        <div class="flex items-center gap-2">
+            @if($suggestedTasksCount > 0)
+                <a href="{{ route('tasks.index') }}" wire:navigate>
+                    <flux:button variant="ghost" size="sm">
+                        <flux:icon.clipboard-document-list class="mr-1 h-4 w-4" />
+                        Tasks ({{ $suggestedTasksCount }} suggested)
+                    </flux:button>
+                </a>
+            @endif
+            <a href="{{ route('standup.archive') }}" wire:navigate>
+                <flux:button variant="ghost" size="sm">
+                    <flux:icon.archive-box class="mr-1 h-4 w-4" />
+                    View Archive
+                </flux:button>
+            </a>
+        </div>
     </div>
+
+    {{-- Interactive Standup Entry (only on work days and if enabled) --}}
+    @if($isWorkDay && $interactiveStandupEnabled && $standup)
+        <livewire:standup.interactive-entry :standup="$standup" />
+    @endif
+
+    {{-- Suggested Tasks Preview --}}
+    @if($suggestedTasksCount > 0)
+        <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <flux:icon.light-bulb class="h-5 w-5 text-blue-500" />
+                    <span class="font-medium text-zinc-900 dark:text-white">
+                        {{ $suggestedTasksCount }} task suggestion{{ $suggestedTasksCount > 1 ? 's' : '' }} waiting
+                    </span>
+                </div>
+                <a href="{{ route('tasks.index') }}" wire:navigate>
+                    <flux:button size="sm" variant="primary">
+                        Review Tasks
+                    </flux:button>
+                </a>
+            </div>
+        </div>
+    @endif
 
     @if($standup)
         <div class="grid gap-6 lg:grid-cols-2">
@@ -71,26 +108,60 @@
                     <div class="space-y-3">
                         @foreach($standup->alerts as $key => $alert)
                             <div class="flex items-start gap-3 rounded-md bg-zinc-50 p-3 dark:bg-zinc-700/50">
-                                @if(str_starts_with($key, 'contract_'))
+                                @if($key === 'contracts_expiring')
                                     <flux:icon.document-text class="mt-0.5 h-5 w-5 text-amber-500" />
+                                    <div>
+                                        @foreach($alert as $contract)
+                                            <p class="text-sm text-zinc-700 dark:text-zinc-300">
+                                                Contract "{{ $contract['name'] }}" expires in {{ $contract['days_remaining'] }} days
+                                            </p>
+                                        @endforeach
+                                    </div>
                                 @elseif($key === 'runway')
                                     <flux:icon.exclamation-triangle class="mt-0.5 h-5 w-5 text-red-500" />
+                                    <div>
+                                        <p class="text-sm text-zinc-700 dark:text-zinc-300">
+                                            Runway alert: {{ $alert['current_runway'] }} months remaining (threshold: {{ $alert['threshold'] }} months)
+                                        </p>
+                                    </div>
                                 @elseif($key === 'urgent_events')
                                     <flux:icon.bolt class="mt-0.5 h-5 w-5 text-purple-500" />
+                                    <div>
+                                        <p class="text-sm text-zinc-700 dark:text-zinc-300">
+                                            {{ count($alert) }} urgent event{{ count($alert) > 1 ? 's' : '' }} in the last 24 hours
+                                        </p>
+                                    </div>
                                 @elseif($key === 'unread_insights')
                                     <flux:icon.light-bulb class="mt-0.5 h-5 w-5 text-blue-500" />
+                                    <div>
+                                        <p class="text-sm text-zinc-700 dark:text-zinc-300">
+                                            {{ $alert }} unread AI insight{{ $alert > 1 ? 's' : '' }}
+                                        </p>
+                                    </div>
+                                @elseif($key === 'overdue_tasks')
+                                    <flux:icon.clock class="mt-0.5 h-5 w-5 text-red-500" />
+                                    <div>
+                                        <p class="text-sm font-medium text-red-600 dark:text-red-400">
+                                            {{ count($alert) }} overdue task{{ count($alert) > 1 ? 's' : '' }}
+                                        </p>
+                                        <ul class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                                            @foreach($alert as $task)
+                                                <li>{{ $task['title'] }} ({{ $task['days_overdue'] }} days overdue)</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
                                 @else
                                     <flux:icon.bell class="mt-0.5 h-5 w-5 text-zinc-500" />
+                                    <div>
+                                        @if(is_array($alert))
+                                            <p class="text-sm text-zinc-700 dark:text-zinc-300">
+                                                {{ $alert['message'] ?? json_encode($alert) }}
+                                            </p>
+                                        @else
+                                            <p class="text-sm text-zinc-700 dark:text-zinc-300">{{ $alert }}</p>
+                                        @endif
+                                    </div>
                                 @endif
-                                <div>
-                                    @if(is_array($alert))
-                                        <p class="text-sm text-zinc-700 dark:text-zinc-300">
-                                            {{ $alert['message'] ?? json_encode($alert) }}
-                                        </p>
-                                    @else
-                                        <p class="text-sm text-zinc-700 dark:text-zinc-300">{{ $alert }}</p>
-                                    @endif
-                                </div>
                             </div>
                         @endforeach
                     </div>

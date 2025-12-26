@@ -7,6 +7,7 @@ use App\Enums\EventSignificance;
 use App\Models\BusinessEvent;
 use App\Models\Contract;
 use App\Models\DailyStandup;
+use App\Models\Task;
 use App\Models\User;
 use App\Services\LLM\LLMManager;
 use Carbon\Carbon;
@@ -73,6 +74,11 @@ class StandupGenerator
         $unreadInsights = $this->getUnreadInsightsCount($user);
         if ($unreadInsights > 0) {
             $alerts['unread_insights'] = $unreadInsights;
+        }
+
+        $overdueTasks = $this->getOverdueTasks($user);
+        if (! empty($overdueTasks)) {
+            $alerts['overdue_tasks'] = $overdueTasks;
         }
 
         return $alerts;
@@ -165,6 +171,28 @@ class StandupGenerator
     protected function getUnreadInsightsCount(User $user): int
     {
         return $user->unreadInsightsCount();
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getOverdueTasks(User $user): array
+    {
+        return Task::query()
+            ->where('user_id', $user->id)
+            ->overdue()
+            ->pending()
+            ->orderByDesc('priority')
+            ->limit(5)
+            ->get()
+            ->map(fn ($task) => [
+                'id' => $task->id,
+                'title' => $task->title,
+                'priority' => $task->priority->value,
+                'due_date' => $task->due_date->toDateString(),
+                'days_overdue' => $task->daysOverdue(),
+            ])
+            ->toArray();
     }
 
     /**

@@ -45,6 +45,15 @@ class DispatchDailyStandups implements ShouldQueue
 
         foreach ($users as $user) {
             try {
+                $preferences = $user->preferences ?? $user->getOrCreatePreferences();
+
+                // Skip if it's not a work day for this user
+                if (! $preferences->isWorkDay()) {
+                    Log::info("Skipping standup email for user {$user->id} - not a work day");
+
+                    continue;
+                }
+
                 $standup = $this->getOrGenerateStandup($user, $generator);
 
                 if (! $standup->email_sent_at) {

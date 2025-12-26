@@ -18,6 +18,7 @@ use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\TwoFactor;
 use App\Livewire\Standup\Archive as StandupArchive;
 use App\Livewire\Standup\Today as StandupToday;
+use App\Livewire\Tasks\Index as TasksIndex;
 use App\Livewire\TrackedEntities\Index as TrackedEntitiesIndex;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -43,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('events', EventsIndex::class)->name('events.index');
     Route::get('events/create', EventsCreate::class)->name('events.create');
     Route::get('insights', InsightsIndex::class)->name('insights.index');
+    Route::get('tasks', TasksIndex::class)->name('tasks.index');
 
     Route::redirect('settings', 'settings/profile');
 

@@ -79,6 +79,68 @@
                 </div>
             </div>
 
+            {{-- Work Days --}}
+            <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-medium text-zinc-900 dark:text-white">Weekends Are Work Days</h3>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                            Include weekends in your work schedule for standups and reminders
+                        </p>
+                    </div>
+                    <flux:switch wire:model.live="weekends_are_workdays" />
+                </div>
+            </div>
+
+            {{-- Interactive Standup --}}
+            <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-medium text-zinc-900 dark:text-white">Interactive Daily Check-in</h3>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                            Show daily check-in form (yesterday/today/blockers) on the standup page
+                        </p>
+                    </div>
+                    <flux:switch wire:model.live="interactive_standup_enabled" />
+                </div>
+            </div>
+
+            {{-- Task Suggestions --}}
+            <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-medium text-zinc-900 dark:text-white">AI Task Suggestions</h3>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                            Allow AI to suggest actionable tasks from insights and standups
+                        </p>
+                    </div>
+                    <flux:switch wire:model.live="task_suggestions_enabled" />
+                </div>
+            </div>
+
+            {{-- Overdue Task Reminders --}}
+            <div class="rounded-lg border border-zinc-200 p-4 dark:border-zinc-700">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-medium text-zinc-900 dark:text-white">Overdue Task Reminders</h3>
+                        <p class="text-sm text-zinc-500 dark:text-zinc-400">
+                            Receive email reminders about overdue tasks
+                        </p>
+                    </div>
+                    <flux:switch wire:model.live="overdue_reminders_enabled" />
+                </div>
+
+                @if($overdue_reminders_enabled)
+                    <div class="mt-4 max-w-xs border-t border-zinc-100 pt-4 dark:border-zinc-700">
+                        <flux:field>
+                            <flux:label>Reminder Time</flux:label>
+                            <flux:input type="time" wire:model="overdue_reminder_time" />
+                            <flux:error name="overdue_reminder_time" />
+                        </flux:field>
+                    </div>
+                @endif
+            </div>
+
             <div class="flex items-center gap-4">
                 <flux:button variant="primary" type="submit">{{ __('Save Preferences') }}</flux:button>
 

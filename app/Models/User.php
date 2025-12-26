@@ -106,6 +106,22 @@ class User extends Authenticatable
         return $this->hasMany(ProactiveInsight::class);
     }
 
+    /**
+     * @return HasMany<Task, $this>
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    /**
+     * @return HasMany<StandupEntry, $this>
+     */
+    public function standupEntries(): HasMany
+    {
+        return $this->hasMany(StandupEntry::class);
+    }
+
     public function getOrCreatePreferences(): UserPreference
     {
         return $this->preferences ?? $this->preferences()->firstOrCreate([]);

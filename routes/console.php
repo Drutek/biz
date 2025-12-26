@@ -7,6 +7,7 @@ use App\Jobs\FetchNewsJob;
 use App\Jobs\GenerateDailyInsights;
 use App\Jobs\GenerateWeeklyInsights;
 use App\Jobs\SendCashBalanceReminders;
+use App\Jobs\SendOverdueTaskReminders;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -44,3 +45,6 @@ Schedule::job(new DispatchDailyStandups)->everyFifteenMinutes();
 
 // Weekly cash balance reminder - every Sunday at 9am
 Schedule::job(new SendCashBalanceReminders)->weeklyOn(0, '09:00');
+
+// Overdue task reminders - every 15 minutes to catch user-preferred times
+Schedule::job(new SendOverdueTaskReminders)->everyFifteenMinutes();

@@ -20,6 +20,16 @@ class Notifications extends Component
 
     public int $runway_alert_threshold = 3;
 
+    public bool $weekends_are_workdays = false;
+
+    public bool $task_suggestions_enabled = true;
+
+    public bool $overdue_reminders_enabled = true;
+
+    public string $overdue_reminder_time = '09:00';
+
+    public bool $interactive_standup_enabled = true;
+
     public function mount(): void
     {
         $preferences = Auth::user()->getOrCreatePreferences();
@@ -30,6 +40,11 @@ class Notifications extends Component
         $this->in_app_notifications_enabled = $preferences->in_app_notifications_enabled;
         $this->proactive_insights_enabled = $preferences->proactive_insights_enabled;
         $this->runway_alert_threshold = $preferences->runway_alert_threshold;
+        $this->weekends_are_workdays = $preferences->weekends_are_workdays ?? false;
+        $this->task_suggestions_enabled = $preferences->task_suggestions_enabled ?? true;
+        $this->overdue_reminders_enabled = $preferences->overdue_reminders_enabled ?? true;
+        $this->overdue_reminder_time = $preferences->overdue_reminder_time ?? '09:00';
+        $this->interactive_standup_enabled = $preferences->interactive_standup_enabled ?? true;
     }
 
     public function save(): void
@@ -38,6 +53,7 @@ class Notifications extends Component
             'standup_email_time' => 'required|string|regex:/^\d{2}:\d{2}$/',
             'standup_email_timezone' => 'required|timezone',
             'runway_alert_threshold' => 'required|integer|min:1|max:24',
+            'overdue_reminder_time' => 'required|string|regex:/^\d{2}:\d{2}$/',
         ]);
 
         $preferences = Auth::user()->getOrCreatePreferences();
@@ -49,6 +65,11 @@ class Notifications extends Component
             'in_app_notifications_enabled' => $this->in_app_notifications_enabled,
             'proactive_insights_enabled' => $this->proactive_insights_enabled,
             'runway_alert_threshold' => $this->runway_alert_threshold,
+            'weekends_are_workdays' => $this->weekends_are_workdays,
+            'task_suggestions_enabled' => $this->task_suggestions_enabled,
+            'overdue_reminders_enabled' => $this->overdue_reminders_enabled,
+            'overdue_reminder_time' => $this->overdue_reminder_time,
+            'interactive_standup_enabled' => $this->interactive_standup_enabled,
         ]);
 
         $this->dispatch('preferences-updated');

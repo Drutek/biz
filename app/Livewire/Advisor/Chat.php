@@ -6,6 +6,7 @@ use App\Models\AdvisoryThread;
 use App\Services\AdvisoryContextBuilder;
 use App\Services\Embedding\VectorSearchService;
 use App\Services\LLM\LLMManager;
+use App\Services\LLM\Tools\ProductsTool;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -137,12 +138,17 @@ class Chat extends Component
                 ->toArray();
 
             $llmManager = app(LLMManager::class);
+            $tools = [
+                new ProductsTool,
+            ];
+
             $response = $llmManager->driver()->chatStream(
                 $messages,
                 function (string $chunk) {
                     $this->stream('streamingResponse', $chunk);
                 },
-                $systemPrompt
+                $systemPrompt,
+                $tools
             );
 
             $thread->addAssistantMessage(

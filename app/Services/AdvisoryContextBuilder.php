@@ -29,10 +29,9 @@ class AdvisoryContextBuilder
         $projections = $calculator->project(6);
 
         $eventHistory = $user ? $this->formatEventHistory($user) : '';
-        $productSummary = $this->formatProductSummary($user);
 
         $context = <<<EOT
-You are a strategic business advisor for {$companyName}. You have access to their current financial position, product portfolio, and recent market news.
+You are a strategic business advisor for {$companyName}. You have access to their current financial position and recent market news. You can use the get_products tool to see details about their product portfolio (books, SaaS, courses, etc.) when relevant.
 {$businessProfile}
 FINANCIAL POSITION AS OF {$this->formatDate(now())}:
 
@@ -52,13 +51,13 @@ Runway: {$this->formatRunway($summary['runway_months'])}
 
 CASHFLOW NEXT 6 MONTHS:
 {$this->formatProjections($projections)}
-{$productSummary}
+
 RECENT MARKET NEWS:
 {$this->formatRecentNews()}
 {$eventHistory}
 ---
 
-Provide strategic advice based on this context. Be direct, practical, and specific. Flag risks proactively. When discussing opportunities, consider the financial constraints shown above. For products, consider ROI vs consulting rate and recommend when to continue or sunset products.
+Provide strategic advice based on this context. Be direct, practical, and specific. Flag risks proactively. When discussing opportunities, consider the financial constraints shown above. For product-related questions, use the get_products tool to fetch current product data, then consider ROI vs consulting rate and recommend when to continue or sunset products.
 EOT;
 
         return $context;

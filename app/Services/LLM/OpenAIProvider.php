@@ -12,9 +12,10 @@ class OpenAIProvider implements LLMProvider
     private const MODEL = 'gpt-4o';
 
     /**
-     * @param  array<array{role: string, content: string}>  $messages
+     * @param  array<array{role: string, content: string|array}>  $messages
+     * @param  Tool[]  $tools
      */
-    public function chat(array $messages, ?string $system = null): LLMResponse
+    public function chat(array $messages, ?string $system = null, array $tools = []): LLMResponse
     {
         $apiKey = Setting::get(Setting::KEY_OPENAI_API_KEY) ?? config('services.openai.key');
 
@@ -63,10 +64,11 @@ class OpenAIProvider implements LLMProvider
     }
 
     /**
-     * @param  array<array{role: string, content: string}>  $messages
+     * @param  array<array{role: string, content: string|array}>  $messages
      * @param  callable(string): void  $onChunk
+     * @param  Tool[]  $tools
      */
-    public function chatStream(array $messages, callable $onChunk, ?string $system = null): LLMResponse
+    public function chatStream(array $messages, callable $onChunk, ?string $system = null, array $tools = []): LLMResponse
     {
         $apiKey = Setting::get(Setting::KEY_OPENAI_API_KEY) ?? config('services.openai.key');
 

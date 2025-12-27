@@ -48,3 +48,6 @@ Schedule::job(new SendCashBalanceReminders)->weeklyOn(0, '09:00');
 
 // Overdue task reminders - every 15 minutes to catch user-preferred times
 Schedule::job(new SendOverdueTaskReminders)->everyFifteenMinutes();
+
+// Product revenue snapshots - first day of each month at 1am
+Schedule::command('products:capture-snapshots')->monthlyOn(1, '01:00');

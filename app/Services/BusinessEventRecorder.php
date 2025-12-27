@@ -5,12 +5,15 @@ namespace App\Services;
 use App\Enums\EventCategory;
 use App\Enums\EventSignificance;
 use App\Enums\EventType;
+use App\Enums\ProductStatus;
 use App\Events\BusinessEventRecorded;
 use App\Models\BusinessEvent;
 use App\Models\Contract;
 use App\Models\Expense;
 use App\Models\NewsItem;
 use App\Models\ProactiveInsight;
+use App\Models\Product;
+use App\Models\ProductMilestone;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -225,6 +228,89 @@ class BusinessEventRecorder
         );
     }
 
+    public function recordProductLaunched(Product $product, User $user): BusinessEvent
+    {
+        return $this->record(
+            user: $user,
+            type: EventType::ProductLaunched,
+            category: EventCategory::Product,
+            title: "Product launched: {$product->name}",
+            description: "{$product->product_type->label()} launched with {$product->pricing_model->label()} pricing",
+            significance: EventSignificance::High,
+            eventable: $product,
+            metadata: [
+                'product_id' => $product->id,
+                'product_type' => $product->product_type->value,
+                'pricing_model' => $product->pricing_model->value,
+                'price' => $product->price,
+            ]
+        );
+    }
+
+    public function recordProductRevenueChange(Product $product, User $user): BusinessEvent
+    {
+        $description = $product->pricing_model->hasRecurringRevenue()
+            ? "MRR: {$this->formatCurrency($product->mrr)}, {$product->subscriber_count} subscribers"
+            : "Total revenue: {$this->formatCurrency($product->total_revenue)}, {$product->units_sold} units sold";
+
+        return $this->record(
+            user: $user,
+            type: EventType::ProductRevenueChange,
+            category: EventCategory::Product,
+            title: "Revenue update: {$product->name}",
+            description: $description,
+            significance: $this->determineProductRevenueSignificance($product),
+            eventable: $product,
+            metadata: [
+                'product_id' => $product->id,
+                'mrr' => $product->mrr,
+                'total_revenue' => $product->total_revenue,
+                'subscriber_count' => $product->subscriber_count,
+                'units_sold' => $product->units_sold,
+            ]
+        );
+    }
+
+    public function recordMilestoneCompleted(ProductMilestone $milestone, User $user): BusinessEvent
+    {
+        return $this->record(
+            user: $user,
+            type: EventType::ProductMilestone,
+            category: EventCategory::Product,
+            title: "Milestone completed: {$milestone->title}",
+            description: "Milestone for {$milestone->product->name} completed",
+            significance: EventSignificance::Medium,
+            eventable: $milestone->product,
+            metadata: [
+                'milestone_id' => $milestone->id,
+                'product_id' => $milestone->product_id,
+                'product_name' => $milestone->product->name,
+            ]
+        );
+    }
+
+    public function recordProductStatusChange(
+        Product $product,
+        ProductStatus $oldStatus,
+        ProductStatus $newStatus,
+        User $user
+    ): BusinessEvent {
+        return $this->record(
+            user: $user,
+            type: EventType::ProductStatusChange,
+            category: EventCategory::Product,
+            title: "Status change: {$product->name}",
+            description: "{$oldStatus->label()} → {$newStatus->label()}",
+            significance: EventSignificance::Low,
+            eventable: $product,
+            metadata: [
+                'product_id' => $product->id,
+                'old_status' => $oldStatus->value,
+                'new_status' => $newStatus->value,
+            ]
+        );
+    }
+
     protected function record(
         User $user,
         EventType $type,
@@ -309,6 +395,28 @@ class BusinessEventRecorder
             \App\Enums\InsightPriority::High => EventSignificance::High,
             \App\Enums\InsightPriority::Medium => EventSignificance::Medium,
             \App\Enums\InsightPriority::Low => EventSignificance::Low,
+        };
+    }
+
+    protected function determineProductRevenueSignificance(Product $product): EventSignificance
+    {
+        $mrr = (float) $product->mrr;
+        $totalRevenue = (float) $product->total_revenue;
+
+        // For subscription products, base on MRR
+        if ($product->pricing_model->hasRecurringRevenue()) {
+            return match (true) {
+                $mrr >= 5000 => EventSignificance::High,
+                $mrr >= 1000 => EventSignificance::Medium,
+                default => EventSignificance::Low,
+            };
+        }
+
+        // For one-time products, base on total revenue
+        return match (true) {
+            $totalRevenue >= 10000 => EventSignificance::High,
+            $totalRevenue >= 2000 => EventSignificance::Medium,
+            default => EventSignificance::Low,
         };
     }
 }

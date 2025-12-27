@@ -58,6 +58,8 @@ class Setting extends Model
 
     public const KEY_CASH_BALANCE = 'cash_balance';
 
+    public const KEY_HOURLY_RATE = 'hourly_rate';
+
     public const KEY_CURRENCY = 'currency';
 
     public const DEFAULT_CURRENCY = 'USD';

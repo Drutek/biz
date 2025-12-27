@@ -14,6 +14,12 @@ enum EventType: string
     case AiInsight = 'ai_insight';
     case Manual = 'manual';
 
+    // Product events
+    case ProductLaunched = 'product_launched';
+    case ProductRevenueChange = 'product_revenue_change';
+    case ProductMilestone = 'product_milestone';
+    case ProductStatusChange = 'product_status_change';
+
     public function label(): string
     {
         return match ($this) {
@@ -26,6 +32,10 @@ enum EventType: string
             self::NewsAlert => 'News Alert',
             self::AiInsight => 'AI Insight',
             self::Manual => 'Manual Entry',
+            self::ProductLaunched => 'Product Launched',
+            self::ProductRevenueChange => 'Product Revenue Change',
+            self::ProductMilestone => 'Milestone Completed',
+            self::ProductStatusChange => 'Product Status Change',
         };
     }
 
@@ -41,6 +51,10 @@ enum EventType: string
             self::NewsAlert => 'purple',
             self::AiInsight => 'indigo',
             self::Manual => 'zinc',
+            self::ProductLaunched => 'green',
+            self::ProductRevenueChange => 'blue',
+            self::ProductMilestone => 'cyan',
+            self::ProductStatusChange => 'amber',
         };
     }
 
@@ -56,6 +70,10 @@ enum EventType: string
             self::NewsAlert => 'newspaper',
             self::AiInsight => 'light-bulb',
             self::Manual => 'pencil',
+            self::ProductLaunched => 'rocket-launch',
+            self::ProductRevenueChange => 'chart-bar',
+            self::ProductMilestone => 'flag',
+            self::ProductStatusChange => 'arrow-path-rounded-square',
         };
     }
 }

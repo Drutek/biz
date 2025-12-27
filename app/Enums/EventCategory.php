@@ -8,6 +8,7 @@ enum EventCategory: string
     case Market = 'market';
     case Advisory = 'advisory';
     case Milestone = 'milestone';
+    case Product = 'product';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum EventCategory: string
             self::Market => 'Market',
             self::Advisory => 'Advisory',
             self::Milestone => 'Milestone',
+            self::Product => 'Product',
         };
     }
 
@@ -26,6 +28,7 @@ enum EventCategory: string
             self::Market => 'purple',
             self::Advisory => 'indigo',
             self::Milestone => 'yellow',
+            self::Product => 'cyan',
         };
     }
 
@@ -36,6 +39,7 @@ enum EventCategory: string
             self::Market => 'globe-alt',
             self::Advisory => 'chat-bubble-left-right',
             self::Milestone => 'flag',
+            self::Product => 'cube',
         };
     }
 }

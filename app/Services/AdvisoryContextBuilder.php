@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Enums\ContractStatus;
+use App\Enums\PricingModel;
 use App\Models\BusinessEvent;
 use App\Models\Contract;
 use App\Models\Expense;
 use App\Models\NewsItem;
+use App\Models\Product;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Embedding\VectorSearchService;
@@ -27,9 +29,10 @@ class AdvisoryContextBuilder
         $projections = $calculator->project(6);
 
         $eventHistory = $user ? $this->formatEventHistory($user) : '';
+        $productSummary = $this->formatProductSummary($user);
 
         $context = <<<EOT
-You are a strategic business advisor for {$companyName}. You have access to their current financial position and recent market news.
+You are a strategic business advisor for {$companyName}. You have access to their current financial position, product portfolio, and recent market news.
 {$businessProfile}
 FINANCIAL POSITION AS OF {$this->formatDate(now())}:
 
@@ -49,13 +52,13 @@ Runway: {$this->formatRunway($summary['runway_months'])}
 
 CASHFLOW NEXT 6 MONTHS:
 {$this->formatProjections($projections)}
-
+{$productSummary}
 RECENT MARKET NEWS:
 {$this->formatRecentNews()}
 {$eventHistory}
 ---
 
-Provide strategic advice based on this context. Be direct, practical, and specific. Flag risks proactively. When discussing opportunities, consider the financial constraints shown above.
+Provide strategic advice based on this context. Be direct, practical, and specific. Flag risks proactively. When discussing opportunities, consider the financial constraints shown above. For products, consider ROI vs consulting rate and recommend when to continue or sunset products.
 EOT;
 
         return $context;
@@ -179,6 +182,11 @@ EOT;
 
         $runwayMonths = $summary['runway_months'];
 
+        // Product metrics
+        $launchedProducts = Product::launched()->get();
+        $productMrr = $launchedProducts->sum('mrr');
+        $productTotalRevenue = $launchedProducts->sum('total_revenue');
+
         return [
             'company_name' => Setting::get(Setting::KEY_COMPANY_NAME, 'Your Business'),
             'business_industry' => Setting::get(Setting::KEY_BUSINESS_INDUSTRY, ''),
@@ -191,6 +199,10 @@ EOT;
             'runway_months' => is_infinite($runwayMonths) ? null : $runwayMonths,
             'contracts_count' => Contract::confirmed()->count(),
             'pipeline_count' => Contract::pipeline()->count(),
+            'products_launched_count' => $launchedProducts->count(),
+            'products_in_development_count' => Product::inDevelopment()->count(),
+            'product_mrr' => $productMrr,
+            'product_total_revenue' => $productTotalRevenue,
             'created_at' => now()->toIso8601String(),
         ];
     }
@@ -351,5 +363,89 @@ EOT;
         }
 
         return implode("\n", $lines)."\n";
+    }
+
+    private function formatProductSummary(?User $user): string
+    {
+        $products = Product::active()->get();
+
+        if ($products->isEmpty()) {
+            return '';
+        }
+
+        // Get user's hourly rate for ROI comparison
+        $hourlyRate = Setting::get(Setting::KEY_HOURLY_RATE);
+        $hourlyRate = $hourlyRate ? (float) $hourlyRate : null;
+
+        $lines = ["\nPRODUCT PORTFOLIO:"];
+
+        // Launched products
+        $launched = $products->filter(fn (Product $p) => $p->isLaunched());
+        if ($launched->isNotEmpty()) {
+            $lines[] = 'Launched Products:';
+            foreach ($launched as $product) {
+                $lines[] = $this->formatProductLine($product, $hourlyRate);
+            }
+        }
+
+        // In development products
+        $inDev = $products->filter(fn (Product $p) => $p->isInDevelopment());
+        if ($inDev->isNotEmpty()) {
+            $lines[] = 'In Development:';
+            foreach ($inDev as $product) {
+                $launchInfo = $product->target_launch_date
+                    ? "target: {$product->target_launch_date->format('M j, Y')}"
+                    : 'no target date';
+                $hoursInfo = $product->hours_invested > 0
+                    ? " | {$product->hours_invested} hrs invested"
+                    : '';
+                $lines[] = "  - {$product->name} ({$product->status->label()}) - {$launchInfo}{$hoursInfo}";
+            }
+        }
+
+        $lines[] = '';
+
+        return implode("\n", $lines);
+    }
+
+    private function formatProductLine(Product $product, ?float $hourlyRate): string
+    {
+        $typeLabel = $product->product_type->label();
+
+        // Revenue info based on pricing model
+        if ($product->pricing_model === PricingModel::Subscription) {
+            $revenueInfo = "\${$this->formatCurrency($product->mrr)} MRR, {$product->subscriber_count} subs";
+        } else {
+            $revenueInfo = "\${$this->formatCurrency($product->total_revenue)} total, {$product->units_sold} sold";
+        }
+
+        // Time investment
+        $hoursInfo = "{$product->hours_invested} hrs invested";
+        if ($product->monthly_maintenance_hours > 0) {
+            $hoursInfo .= ", {$product->monthly_maintenance_hours} hrs/mo maintenance";
+        }
+
+        $line = "  - {$product->name} ({$typeLabel}): {$revenueInfo} | {$hoursInfo}";
+
+        // Calculate and show effective hourly rate
+        $effectiveRate = $product->effectiveHourlyRate();
+        if ($effectiveRate > 0) {
+            $rateComparison = '';
+            if ($hourlyRate && $hourlyRate > 0) {
+                $percentage = round(($effectiveRate / $hourlyRate) * 100);
+                $rateComparison = " ({$percentage}% of consulting rate)";
+            }
+            $line .= "\n    → Effective rate: \${$this->formatCurrency($effectiveRate)}/hr{$rateComparison}";
+        }
+
+        // Show revenue trend if available
+        $trend = $product->revenueTrend();
+        if ($trend !== null) {
+            $trendSign = $trend >= 0 ? '+' : '';
+            $trendLabel = $trend >= 0 ? 'growing' : 'declining';
+            $line .= "\n    → Trend: {$trendSign}".number_format($trend, 1)."% last 3 months ({$trendLabel})";
+        }
+
+        return $line;
     }
 }

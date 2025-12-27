@@ -17,6 +17,8 @@ class BusinessProfile extends Component
 
     public ?string $cash_balance = null;
 
+    public ?string $hourly_rate = null;
+
     public string $currency = 'USD';
 
     public function mount(): void
@@ -26,6 +28,7 @@ class BusinessProfile extends Component
         $this->business_target_market = Setting::get(Setting::KEY_BUSINESS_TARGET_MARKET, '');
         $this->business_key_services = Setting::get(Setting::KEY_BUSINESS_KEY_SERVICES, '');
         $this->cash_balance = Setting::get(Setting::KEY_CASH_BALANCE);
+        $this->hourly_rate = Setting::get(Setting::KEY_HOURLY_RATE);
         $this->currency = Setting::get(Setting::KEY_CURRENCY, Setting::DEFAULT_CURRENCY);
     }
 
@@ -50,6 +53,7 @@ class BusinessProfile extends Component
             'business_target_market' => 'nullable|string|max:1000',
             'business_key_services' => 'nullable|string|max:1000',
             'cash_balance' => 'nullable|numeric|min:0',
+            'hourly_rate' => 'nullable|numeric|min:0',
             'currency' => "required|string|in:{$currencyCodes}",
         ];
     }
@@ -63,6 +67,7 @@ class BusinessProfile extends Component
         Setting::set(Setting::KEY_BUSINESS_TARGET_MARKET, $this->business_target_market);
         Setting::set(Setting::KEY_BUSINESS_KEY_SERVICES, $this->business_key_services);
         Setting::set(Setting::KEY_CASH_BALANCE, $this->cash_balance);
+        Setting::set(Setting::KEY_HOURLY_RATE, $this->hourly_rate);
         Setting::set(Setting::KEY_CURRENCY, $this->currency);
 
         $this->dispatch('settings-saved');

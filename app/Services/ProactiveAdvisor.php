@@ -315,6 +315,14 @@ EOT;
 
             EventType::NewsAlert => "There's relevant market news: {$event->title}. {$event->description}\n\nAnalyze how this news might affect the business and recommend any actions.",
 
+            EventType::ProductLaunched => "A new product was just launched: {$event->title}. {$event->description}\n\nProvide strategic recommendations for the launch phase: marketing priorities, early customer acquisition, pricing validation, and key metrics to track.",
+
+            EventType::ProductRevenueChange => "Product revenue changed: {$event->title}. {$event->description}\n\nAnalyze this revenue change considering the product's effective hourly rate vs consulting. Should this product continue, be scaled, or sunset? Provide specific recommendations.",
+
+            EventType::ProductMilestone => "A product development milestone was completed: {$event->title}. {$event->description}\n\nProvide recommendations for the next development phase and suggest priorities.",
+
+            EventType::ProductStatusChange => "A product status changed: {$event->title}. {$event->description}\n\nAnalyze what this status change means for the product roadmap and resource allocation.",
+
             default => "The following business event occurred: {$event->title}. {$event->description}\n\nProvide relevant analysis and recommendations.",
         };
     }
@@ -326,6 +334,10 @@ EOT;
             EventType::ContractExpired, EventType::ContractEnding, EventType::RunwayThreshold => InsightType::Warning,
             EventType::ExpenseChange => $this->isNegativeExpenseChange($event) ? InsightType::Warning : InsightType::Analysis,
             EventType::NewsAlert => InsightType::Analysis,
+            EventType::ProductLaunched => InsightType::Opportunity,
+            EventType::ProductRevenueChange => InsightType::Analysis,
+            EventType::ProductMilestone => InsightType::Analysis,
+            EventType::ProductStatusChange => InsightType::Analysis,
             default => InsightType::Recommendation,
         };
     }
@@ -358,6 +370,10 @@ EOT;
             EventType::ExpenseChange => 'Expense Analysis',
             EventType::RunwayThreshold => 'Runway Alert - Action Required',
             EventType::NewsAlert => 'Market Intelligence Update',
+            EventType::ProductLaunched => 'Product Launch Strategy',
+            EventType::ProductRevenueChange => 'Product Revenue Analysis',
+            EventType::ProductMilestone => 'Development Progress Update',
+            EventType::ProductStatusChange => 'Product Status Update',
             default => 'Business Event Analysis',
         };
     }

@@ -25,6 +25,16 @@
                         placeholder="Enter your current bank balance"
                         description="Used to calculate your runway (months until funds run out)"
                     />
+
+                    <flux:input
+                        wire:model="hourly_rate"
+                        :label="__('Consulting Hourly Rate')"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="e.g., 150"
+                        description="Your typical consulting rate - used to compare product ROI against consulting income"
+                    />
                 </div>
             </div>
 

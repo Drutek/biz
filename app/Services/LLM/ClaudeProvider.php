@@ -10,11 +10,14 @@ class ClaudeProvider implements LLMProvider
 {
     private const API_URL = 'https://api.anthropic.com/v1/messages';
 
-    private const MODEL = 'claude-sonnet-4-20250514';
-
     private const MAX_TOKENS = 4096;
 
     private const MAX_TOOL_ITERATIONS = 10;
+
+    private function getModel(): string
+    {
+        return Setting::get(Setting::KEY_ANTHROPIC_MODEL, Setting::DEFAULT_ANTHROPIC_MODEL);
+    }
 
     /**
      * @param  array<array{role: string, content: string|array}>  $messages
@@ -50,7 +53,7 @@ class ClaudeProvider implements LLMProvider
             return new LLMResponse(
                 content: $content,
                 provider: 'claude',
-                model: self::MODEL,
+                model: $this->getModel(),
                 tokensUsed: $totalTokens,
             );
         }
@@ -97,7 +100,7 @@ class ClaudeProvider implements LLMProvider
             return new LLMResponse(
                 content: $fullContent,
                 provider: 'claude',
-                model: self::MODEL,
+                model: $this->getModel(),
                 tokensUsed: $totalInputTokens + $totalOutputTokens,
             );
         }
@@ -138,7 +141,7 @@ class ClaudeProvider implements LLMProvider
     private function buildPayload(array $messages, ?string $system, array $tools): array
     {
         $payload = [
-            'model' => self::MODEL,
+            'model' => $this->getModel(),
             'max_tokens' => self::MAX_TOKENS,
             'messages' => $messages,
         ];

@@ -102,4 +102,34 @@ describe('Settings API Keys', function () {
             ->call('save')
             ->assertHasErrors(['news_recency']);
     });
+
+    it('loads existing model selections', function () {
+        Setting::set(Setting::KEY_ANTHROPIC_MODEL, 'claude-sonnet-4-20250514');
+        Setting::set(Setting::KEY_OPENAI_MODEL, 'gpt-4o-mini');
+
+        Livewire::test(ApiKeys::class)
+            ->assertSet('anthropic_model', 'claude-sonnet-4-20250514')
+            ->assertSet('openai_model', 'gpt-4o-mini');
+    });
+
+    it('can save model selections', function () {
+        Livewire::test(ApiKeys::class)
+            ->set('anthropic_model', 'claude-opus-4-20250514')
+            ->set('openai_model', 'gpt-4-turbo')
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertDispatched('settings-saved');
+
+        expect(Setting::get(Setting::KEY_ANTHROPIC_MODEL))->toBe('claude-opus-4-20250514');
+        expect(Setting::get(Setting::KEY_OPENAI_MODEL))->toBe('gpt-4-turbo');
+    });
+
+    it('clears model selection when api key is cleared', function () {
+        Livewire::test(ApiKeys::class)
+            ->set('anthropic_api_key', 'test-key')
+            ->set('anthropic_model', 'claude-sonnet-4')
+            ->set('anthropic_api_key', '')
+            ->assertSet('anthropic_model', '')
+            ->assertSet('availableAnthropicModels', []);
+    });
 });

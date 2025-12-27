@@ -22,6 +22,14 @@ class Setting extends Model
 
     public const KEY_ANTHROPIC_API_KEY = 'anthropic_api_key';
 
+    public const KEY_ANTHROPIC_MODEL = 'anthropic_model';
+
+    public const KEY_OPENAI_MODEL = 'openai_model';
+
+    public const DEFAULT_ANTHROPIC_MODEL = 'claude-sonnet-4-20250514';
+
+    public const DEFAULT_OPENAI_MODEL = 'gpt-4o';
+
     public const KEY_SERPAPI_KEY = 'serpapi_key';
 
     public const KEY_NEWS_RECENCY = 'news_recency';

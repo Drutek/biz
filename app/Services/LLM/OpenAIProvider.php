@@ -9,7 +9,10 @@ class OpenAIProvider implements LLMProvider
 {
     private const API_URL = 'https://api.openai.com/v1/chat/completions';
 
-    private const MODEL = 'gpt-4o';
+    private function getModel(): string
+    {
+        return Setting::get(Setting::KEY_OPENAI_MODEL, Setting::DEFAULT_OPENAI_MODEL);
+    }
 
     /**
      * @param  array<array{role: string, content: string|array}>  $messages
@@ -45,7 +48,7 @@ class OpenAIProvider implements LLMProvider
                 'Content-Type' => 'application/json',
             ])
             ->post(self::API_URL, [
-                'model' => self::MODEL,
+                'model' => $this->getModel(),
                 'messages' => $formattedMessages,
             ]);
 
@@ -58,7 +61,7 @@ class OpenAIProvider implements LLMProvider
         return new LLMResponse(
             content: $data['choices'][0]['message']['content'] ?? '',
             provider: 'openai',
-            model: self::MODEL,
+            model: $this->getModel(),
             tokensUsed: $data['usage']['total_tokens'] ?? null,
         );
     }
@@ -93,7 +96,7 @@ class OpenAIProvider implements LLMProvider
         }
 
         $payload = [
-            'model' => self::MODEL,
+            'model' => $this->getModel(),
             'messages' => $formattedMessages,
             'stream' => true,
             'stream_options' => ['include_usage' => true],
@@ -158,7 +161,7 @@ class OpenAIProvider implements LLMProvider
         return new LLMResponse(
             content: $fullContent,
             provider: 'openai',
-            model: self::MODEL,
+            model: $this->getModel(),
             tokensUsed: $tokensUsed,
         );
     }

@@ -5,6 +5,7 @@ use App\Jobs\CheckRunwayThresholds;
 use App\Jobs\DispatchDailyStandups;
 use App\Jobs\FetchNewsJob;
 use App\Jobs\GenerateDailyInsights;
+use App\Jobs\GenerateNewspaperJob;
 use App\Jobs\GenerateWeeklyInsights;
 use App\Jobs\SendCashBalanceReminders;
 use App\Jobs\SendOverdueTaskReminders;
@@ -27,6 +28,9 @@ Artisan::command('inspire', function () {
 
 // Market news - every 4 hours
 Schedule::job(new FetchNewsJob)->everyFourHours();
+
+// Daily newspaper generation - at 6am (after news is fetched)
+Schedule::job(new GenerateNewspaperJob)->dailyAt('06:00');
 
 // Contract expiration checks - daily at 6am
 Schedule::job(new CheckContractExpirations)->dailyAt('06:00');

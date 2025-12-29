@@ -67,6 +67,7 @@ class SerpApiService
                     'snippet' => $result['snippet'] ?? '',
                     'url' => $result['link'],
                     'source' => $result['source']['name'] ?? 'Unknown',
+                    'thumbnail' => $result['thumbnail'] ?? null,
                     'published_at' => $this->parseDate($result['date'] ?? null),
                     'fetched_at' => now(),
                 ]);

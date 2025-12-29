@@ -7,7 +7,7 @@ use App\Livewire\Events\Create as EventsCreate;
 use App\Livewire\Events\Index as EventsIndex;
 use App\Livewire\Expenses\Index as ExpensesIndex;
 use App\Livewire\Insights\Index as InsightsIndex;
-use App\Livewire\News\Index as NewsIndex;
+use App\Livewire\News\Newspaper as NewsNewspaper;
 use App\Livewire\Notifications\Index as NotificationsIndex;
 use App\Livewire\Products\Index as ProductsIndex;
 use App\Livewire\Products\Show as ProductsShow;
@@ -40,7 +40,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('products', ProductsIndex::class)->name('products.index');
     Route::get('products/{product}', ProductsShow::class)->name('products.show');
     Route::get('tracked-entities', TrackedEntitiesIndex::class)->name('tracked-entities.index');
-    Route::get('news', NewsIndex::class)->name('news.index');
+    Route::get('news', NewsNewspaper::class)->name('news.index');
     Route::get('notifications', NotificationsIndex::class)->name('notifications.index');
     Route::get('advisor', AdvisorChat::class)->name('advisor.index');
 

@@ -21,6 +21,7 @@ class NewsItem extends Model
         'snippet',
         'url',
         'source',
+        'thumbnail',
         'published_at',
         'fetched_at',
         'is_read',

@@ -26,7 +26,7 @@ class SerpApiService
         try {
             $params = [
                 'engine' => 'google_news',
-                'q' => $entity->search_query,
+                'q' => $entity->getEffectiveSearchQuery(),
                 'api_key' => $apiKey,
             ];
 

@@ -28,6 +28,7 @@ class TrackedEntityFactory extends Factory
             'name' => $name,
             'entity_type' => $entityType,
             'search_query' => $name.' news',
+            'negative_terms' => null,
             'is_active' => true,
         ];
     }
@@ -65,6 +66,13 @@ class TrackedEntityFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_active' => false,
+        ]);
+    }
+
+    public function withNegativeTerms(string $terms = 'stock price, earnings report'): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'negative_terms' => $terms,
         ]);
     }
 }

@@ -17,6 +17,7 @@ class TrackedEntity extends Model
         'name',
         'entity_type',
         'search_query',
+        'negative_terms',
         'is_active',
     ];
 
@@ -55,5 +56,26 @@ class TrackedEntity extends Model
     public function scopeOfType(Builder $query, EntityType $type): Builder
     {
         return $query->where('entity_type', $type);
+    }
+
+    /**
+     * Build the effective search query including negative terms.
+     */
+    public function getEffectiveSearchQuery(): string
+    {
+        $query = $this->search_query;
+
+        if (empty($this->negative_terms)) {
+            return $query;
+        }
+
+        $terms = array_map('trim', explode(',', $this->negative_terms));
+        $terms = array_filter($terms, fn ($term) => $term !== '');
+
+        foreach ($terms as $term) {
+            $query .= ' -"'.$term.'"';
+        }
+
+        return $query;
     }
 }

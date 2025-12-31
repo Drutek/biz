@@ -23,6 +23,12 @@
     </flux:field>
 
     <flux:field>
+        <flux:label>Exclude Terms</flux:label>
+        <flux:textarea wire:model="negative_terms" placeholder="stock price, earnings report, SEC filing" rows="2" />
+        <flux:description>Comma-separated terms to exclude from news results.</flux:description>
+    </flux:field>
+
+    <flux:field>
         <flux:checkbox wire:model="is_active" label="Active" />
         <flux:description>Only active entities are monitored for news.</flux:description>
     </flux:field>

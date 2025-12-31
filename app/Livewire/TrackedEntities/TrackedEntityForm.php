@@ -18,6 +18,8 @@ class TrackedEntityForm extends Component
 
     public string $search_query = '';
 
+    public string $negative_terms = '';
+
     public bool $is_active = true;
 
     /**
@@ -29,6 +31,7 @@ class TrackedEntityForm extends Component
             'name' => 'required|string|max:255',
             'entity_type' => 'required|string|in:'.implode(',', array_column(EntityType::cases(), 'value')),
             'search_query' => 'nullable|string',
+            'negative_terms' => 'nullable|string',
             'is_active' => 'boolean',
         ];
     }
@@ -49,6 +52,7 @@ class TrackedEntityForm extends Component
             $this->name = $entity->name;
             $this->entity_type = $entity->entity_type->value;
             $this->search_query = $entity->search_query ?? '';
+            $this->negative_terms = $entity->negative_terms ?? '';
             $this->is_active = $entity->is_active;
         } else {
             $this->resetForm();
@@ -63,6 +67,7 @@ class TrackedEntityForm extends Component
             'name' => $this->name,
             'entity_type' => $this->entity_type,
             'search_query' => $this->search_query ?: $this->name.' news',
+            'negative_terms' => $this->negative_terms ?: null,
             'is_active' => $this->is_active,
         ];
 
@@ -82,6 +87,7 @@ class TrackedEntityForm extends Component
         $this->name = '';
         $this->entity_type = '';
         $this->search_query = '';
+        $this->negative_terms = '';
         $this->is_active = true;
         $this->resetValidation();
     }

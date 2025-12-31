@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\News\Index;
+use App\Livewire\News\Newspaper;
 use App\Models\NewsItem;
 use App\Models\TrackedEntity;
 use App\Models\User;
@@ -15,7 +16,7 @@ describe('News Index', function () {
     it('renders the index page', function () {
         $this->get(route('news.index'))
             ->assertSuccessful()
-            ->assertSeeLivewire(Index::class);
+            ->assertSeeLivewire(Newspaper::class);
     });
 
     it('displays news items', function () {

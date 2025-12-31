@@ -47,7 +47,7 @@ class NewspaperEdition extends Model
      */
     public function scopeForDate(Builder $query, \Carbon\Carbon $date): Builder
     {
-        return $query->where('edition_date', $date->toDateString());
+        return $query->whereDate('edition_date', $date);
     }
 
     /**

@@ -175,9 +175,17 @@ describe('Newspaper Livewire Component', function () {
     it('shows regenerate button', function () {
         $user = User::factory()->create();
 
+        // Prerequisites: need tracked entities and recent news
+        $entity = TrackedEntity::factory()->create(['is_active' => true]);
+        NewsItem::factory()->create([
+            'tracked_entity_id' => $entity->id,
+            'fetched_at' => now(),
+            'is_relevant' => true,
+        ]);
+
         Livewire::actingAs($user)
             ->test(Newspaper::class)
-            ->assertSee('Generate Today\'s Edition');
+            ->assertSeeHtml('Generate Today\'s Edition');
     });
 });
 

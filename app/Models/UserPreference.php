@@ -19,6 +19,7 @@ class UserPreference extends Model
         'standup_email_timezone',
         'in_app_notifications_enabled',
         'proactive_insights_enabled',
+        'insight_frequency',
         'runway_alert_threshold',
         'hourly_rate',
         'weekends_are_workdays',

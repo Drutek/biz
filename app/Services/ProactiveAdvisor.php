@@ -40,6 +40,13 @@ Focus on:
 2. Opportunities worth acting on today
 3. Key metrics that need attention
 
+IMPORTANT GUIDELINES:
+- Check the "RECENT ONE-TIME EXPENSES" section before concluding there's a cash crisis
+- One-time expenses (tax payments, equipment purchases, annual subscriptions) are NORMAL business operations, not emergencies
+- Only flag cash concerns if the RECURRING monthly burn rate exceeds income, not if cash dropped due to expected one-time payments
+- Corporation tax, VAT, equipment purchases, and similar one-time payments should NOT trigger crisis alerts
+- If cash decreased but there's a matching one-time expense, that explains the decrease - it's not a mystery or crisis
+
 Be concise and actionable. If there are no urgent matters, provide a brief summary of the current position.
 EOT;
 
@@ -84,6 +91,14 @@ Include:
 3. Strategic opportunities to pursue
 4. Risks to monitor
 5. Recommended priorities for the coming week
+
+IMPORTANT GUIDELINES FOR FINANCIAL ASSESSMENT:
+- Check the "RECENT ONE-TIME EXPENSES" section to understand cash balance changes
+- One-time expenses (tax payments, equipment, annual subscriptions) are planned business costs, not emergencies
+- Assess financial health based on RECURRING income vs RECURRING expenses, not on cash fluctuations from one-time payments
+- Corporation tax, VAT, equipment purchases are normal and expected - do not treat them as crises
+- When calculating "burn rate", only use recurring expenses, not one-time payments
+- A large one-time expense followed by lower cash is normal business, not a pattern of crisis
 
 Be thorough but practical. Focus on actionable insights.
 EOT;
@@ -385,7 +400,24 @@ EOT;
         $crossedBelow = $context['crossed_below'] ?? true;
 
         if ($crossedBelow) {
-            return "URGENT: Business runway has dropped to {$currentRunway} months, below the {$threshold} month warning threshold.\n\nProvide immediate, actionable recommendations to:\n1. Reduce expenses quickly\n2. Accelerate revenue\n3. Secure emergency funding if needed\n\nBe specific and prioritize by impact.";
+            return <<<EOT
+Business runway has dropped to {$currentRunway} months, below the {$threshold} month warning threshold.
+
+BEFORE recommending drastic action, check:
+1. Was there a recent ONE-TIME expense (tax payment, equipment purchase) that explains the cash decrease?
+2. Is the RECURRING monthly income still exceeding RECURRING monthly expenses?
+3. If recurring cashflow is positive, this may be a temporary dip, not a crisis
+
+If this is due to a planned one-time expense and recurring cashflow is healthy:
+- Acknowledge the temporary impact
+- Note when cash should recover based on recurring income
+- Suggest any sensible timing adjustments for future large payments
+
+Only if there's a genuine recurring cashflow problem, provide recommendations to:
+1. Reduce recurring expenses
+2. Accelerate revenue
+3. Consider funding options if truly needed
+EOT;
         }
 
         return "Business runway has recovered to {$currentRunway} months, above the {$threshold} month threshold.\n\nProvide recommendations for:\n1. Maintaining this improved position\n2. Building additional buffer\n3. Preventing future threshold breaches";

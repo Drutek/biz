@@ -23,6 +23,7 @@ class UserPreferenceFactory extends Factory
             'standup_email_timezone' => 'UTC',
             'in_app_notifications_enabled' => true,
             'proactive_insights_enabled' => true,
+            'insight_frequency' => 'weekly',
             'runway_alert_threshold' => 3,
         ];
     }
@@ -45,6 +46,20 @@ class UserPreferenceFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'proactive_insights_enabled' => false,
+        ]);
+    }
+
+    public function dailyInsights(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'insight_frequency' => 'daily',
+        ]);
+    }
+
+    public function eventOnlyInsights(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'insight_frequency' => 'event_only',
         ]);
     }
 

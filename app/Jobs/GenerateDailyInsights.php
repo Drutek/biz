@@ -25,9 +25,16 @@ class GenerateDailyInsights implements ShouldQueue
 
         $users = User::query()
             ->whereHas('preferences', function ($query) {
-                $query->where('proactive_insights_enabled', true);
+                $query->where('proactive_insights_enabled', true)
+                    ->where('insight_frequency', 'daily');
             })
             ->get();
+
+        if ($users->isEmpty()) {
+            Log::info('No users with daily insight frequency - skipping');
+
+            return;
+        }
 
         foreach ($users as $user) {
             try {

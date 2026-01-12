@@ -319,7 +319,10 @@ describe('GenerateInsightOnEvent Listener', function () {
 });
 
 describe('GenerateDailyInsights Job', function () {
-    it('generates insights for users with enabled preferences', function () {
+    it('generates insights for users with daily frequency preference', function () {
+        // Update user preference to daily frequency
+        $this->user->preferences->update(['insight_frequency' => 'daily']);
+
         $mockResponse = new LLMResponse(
             content: 'Daily analysis content',
             provider: 'claude',
@@ -342,6 +345,20 @@ describe('GenerateDailyInsights Job', function () {
         );
 
         expect(ProactiveInsight::count())->toBe(1);
+    });
+
+    it('skips users with weekly frequency preference', function () {
+        // Default factory sets weekly frequency
+        $mockManager = Mockery::mock(LLMManager::class);
+        $mockManager->shouldNotReceive('driver');
+
+        $job = new GenerateDailyInsights;
+        $job->handle(
+            new ProactiveAdvisor($mockManager, new AdvisoryContextBuilder),
+            app(\App\Services\BusinessEventRecorder::class)
+        );
+
+        expect(ProactiveInsight::count())->toBe(0);
     });
 
     it('skips users with disabled preferences', function () {
@@ -437,5 +454,89 @@ describe('AdvisoryContextBuilder with Events', function () {
         $context = $builder->build($this->user);
 
         expect($context)->not->toContain('Old Event');
+    });
+
+    it('includes recent one-time expenses in context', function () {
+        \App\Models\Expense::factory()->create([
+            'name' => 'Corporation Tax Payment',
+            'amount' => 15000,
+            'frequency' => \App\Enums\ExpenseFrequency::OneTime,
+            'category' => 'tax',
+            'start_date' => now()->subDays(5),
+        ]);
+
+        $builder = new AdvisoryContextBuilder;
+        $context = $builder->build($this->user);
+
+        expect($context)->toContain('RECENT ONE-TIME EXPENSES')
+            ->and($context)->toContain('Corporation Tax Payment')
+            ->and($context)->toContain('15,000.00')
+            ->and($context)->toContain('not included in monthly burn');
+    });
+
+    it('excludes old one-time expenses from context', function () {
+        \App\Models\Expense::factory()->create([
+            'name' => 'Old Equipment Purchase',
+            'frequency' => \App\Enums\ExpenseFrequency::OneTime,
+            'start_date' => now()->subDays(100),
+        ]);
+
+        $builder = new AdvisoryContextBuilder;
+        $context = $builder->build($this->user);
+
+        expect($context)->not->toContain('Old Equipment Purchase');
+    });
+
+    it('includes analysis guidelines in context', function () {
+        $builder = new AdvisoryContextBuilder;
+        $context = $builder->build($this->user);
+
+        expect($context)->toContain('ANALYSIS GUIDELINES')
+            ->and($context)->toContain('RECURRING income vs RECURRING expenses')
+            ->and($context)->toContain('Tax payments');
+    });
+});
+
+describe('GenerateWeeklyInsights Job with Frequency', function () {
+    it('skips users with event_only frequency', function () {
+        $this->user->preferences->update(['insight_frequency' => 'event_only']);
+
+        $mockManager = Mockery::mock(LLMManager::class);
+        $mockManager->shouldNotReceive('driver');
+
+        $job = new GenerateWeeklyInsights;
+        $job->handle(
+            new ProactiveAdvisor($mockManager, new AdvisoryContextBuilder),
+            app(\App\Services\BusinessEventRecorder::class)
+        );
+
+        expect(ProactiveInsight::count())->toBe(0);
+    });
+
+    it('generates for users with weekly frequency', function () {
+        // Default factory sets weekly frequency
+        $mockResponse = new LLMResponse(
+            content: 'Weekly analysis content',
+            provider: 'claude',
+            model: 'claude-3-sonnet',
+            tokensUsed: 100
+        );
+
+        $mockProvider = Mockery::mock(\App\Services\LLM\LLMProvider::class);
+        $mockProvider->shouldReceive('chat')->andReturn($mockResponse);
+
+        $mockManager = Mockery::mock(LLMManager::class);
+        $mockManager->shouldReceive('driver')->andReturn($mockProvider);
+
+        app()->instance(LLMManager::class, $mockManager);
+
+        $job = new GenerateWeeklyInsights;
+        $job->handle(
+            new ProactiveAdvisor($mockManager, new AdvisoryContextBuilder),
+            app(\App\Services\BusinessEventRecorder::class)
+        );
+
+        // Weekly + opportunity insights
+        expect(ProactiveInsight::count())->toBeGreaterThanOrEqual(1);
     });
 });

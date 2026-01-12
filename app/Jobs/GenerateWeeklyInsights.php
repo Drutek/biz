@@ -25,7 +25,8 @@ class GenerateWeeklyInsights implements ShouldQueue
 
         $users = User::query()
             ->whereHas('preferences', function ($query) {
-                $query->where('proactive_insights_enabled', true);
+                $query->where('proactive_insights_enabled', true)
+                    ->whereIn('insight_frequency', ['daily', 'weekly']);
             })
             ->get();
 

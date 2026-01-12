@@ -18,6 +18,8 @@ class Notifications extends Component
 
     public bool $proactive_insights_enabled = true;
 
+    public string $insight_frequency = 'weekly';
+
     public int $runway_alert_threshold = 3;
 
     public bool $weekends_are_workdays = false;
@@ -39,6 +41,7 @@ class Notifications extends Component
         $this->standup_email_timezone = $preferences->standup_email_timezone;
         $this->in_app_notifications_enabled = $preferences->in_app_notifications_enabled;
         $this->proactive_insights_enabled = $preferences->proactive_insights_enabled;
+        $this->insight_frequency = $preferences->insight_frequency ?? 'weekly';
         $this->runway_alert_threshold = $preferences->runway_alert_threshold;
         $this->weekends_are_workdays = $preferences->weekends_are_workdays ?? false;
         $this->task_suggestions_enabled = $preferences->task_suggestions_enabled ?? true;
@@ -52,6 +55,7 @@ class Notifications extends Component
         $this->validate([
             'standup_email_time' => 'required|string|regex:/^\d{2}:\d{2}$/',
             'standup_email_timezone' => 'required|timezone',
+            'insight_frequency' => 'required|in:daily,weekly,event_only',
             'runway_alert_threshold' => 'required|integer|min:1|max:24',
             'overdue_reminder_time' => 'required|string|regex:/^\d{2}:\d{2}$/',
         ]);
@@ -64,6 +68,7 @@ class Notifications extends Component
             'standup_email_timezone' => $this->standup_email_timezone,
             'in_app_notifications_enabled' => $this->in_app_notifications_enabled,
             'proactive_insights_enabled' => $this->proactive_insights_enabled,
+            'insight_frequency' => $this->insight_frequency,
             'runway_alert_threshold' => $this->runway_alert_threshold,
             'weekends_are_workdays' => $this->weekends_are_workdays,
             'task_suggestions_enabled' => $this->task_suggestions_enabled,

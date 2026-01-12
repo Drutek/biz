@@ -60,6 +60,22 @@
                     </div>
                     <flux:switch wire:model.live="proactive_insights_enabled" />
                 </div>
+
+                @if($proactive_insights_enabled)
+                    <div class="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-700">
+                        <flux:field>
+                            <flux:label>Insight Frequency</flux:label>
+                            <flux:select wire:model="insight_frequency">
+                                <flux:select.option value="weekly">Weekly (Recommended)</flux:select.option>
+                                <flux:select.option value="daily">Daily</flux:select.option>
+                                <flux:select.option value="event_only">Event-triggered only</flux:select.option>
+                            </flux:select>
+                            <flux:text size="sm" class="mt-1 text-zinc-500 dark:text-zinc-400">
+                                Weekly provides strategic analysis every Monday. Event-triggered only generates insights when significant business events occur.
+                            </flux:text>
+                        </flux:field>
+                    </div>
+                @endif
             </div>
 
             {{-- Runway Alert Threshold --}}

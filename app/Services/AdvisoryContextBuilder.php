@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\ContractStatus;
+use App\Enums\ExpenseFrequency;
 use App\Enums\PricingModel;
 use App\Models\BusinessEvent;
 use App\Models\Contract;
@@ -43,9 +44,9 @@ Confirmed Monthly Income: {$this->formatCurrency($summary['monthly_income'])}
 Pipeline (Weighted): {$this->formatCurrency($summary['monthly_pipeline'])}
 {$this->formatContracts(ContractStatus::Pipeline)}
 
-Monthly Expenses: {$this->formatCurrency($summary['monthly_expenses'])}
+Monthly Recurring Expenses: {$this->formatCurrency($summary['monthly_expenses'])}
 {$this->formatExpensesByCategory()}
-
+{$this->formatRecentOneTimeExpenses()}
 Net Monthly: {$this->formatCurrency($summary['monthly_net'])}
 Runway: {$this->formatRunway($summary['runway_months'])}
 
@@ -56,6 +57,14 @@ RECENT MARKET NEWS:
 {$this->formatRecentNews()}
 {$eventHistory}
 ---
+
+ANALYSIS GUIDELINES:
+1. Financial health is determined by RECURRING income vs RECURRING expenses, not by total cash balance
+2. One-time expenses (listed under "RECENT ONE-TIME EXPENSES") are normal business costs that have already been paid - they should NOT be included in burn rate calculations
+3. Tax payments (corporation tax, VAT, PAYE) are predictable annual/quarterly expenses - a cash drop after a tax payment is normal, not a crisis
+4. When assessing runway, use: Cash Balance / (Monthly Recurring Expenses - Monthly Recurring Income)
+5. A business is healthy if recurring income exceeds or closely matches recurring expenses, even if cash temporarily decreased from one-time payments
+6. Only flag genuine concerns: sustained negative recurring cashflow, approaching contract expirations with no pipeline, or truly unusual expense patterns
 
 Provide strategic advice based on this context. Be direct, practical, and specific. Flag risks proactively. When discussing opportunities, consider the financial constraints shown above. For product-related questions, use the get_products tool to fetch current product data, then consider ROI vs consulting rate and recommend when to continue or sunset products.
 EOT;
@@ -296,6 +305,30 @@ EOT;
             $total = $items->sum(fn (Expense $e) => $e->monthlyAmount());
             $lines[] = '  - '.ucfirst($category).': '.$this->formatCurrency($total).'/mo';
         }
+
+        return implode("\n", $lines);
+    }
+
+    private function formatRecentOneTimeExpenses(): string
+    {
+        $oneTimeExpenses = Expense::query()
+            ->where('frequency', ExpenseFrequency::OneTime)
+            ->where('start_date', '>=', now()->subDays(90))
+            ->orderByDesc('start_date')
+            ->limit(10)
+            ->get();
+
+        if ($oneTimeExpenses->isEmpty()) {
+            return '';
+        }
+
+        $lines = ["\nRECENT ONE-TIME EXPENSES (not included in monthly burn):"];
+        foreach ($oneTimeExpenses as $expense) {
+            $date = $expense->start_date->format('M j, Y');
+            $category = ucfirst($expense->category);
+            $lines[] = "  - [{$date}] {$expense->name} ({$category}): {$this->formatCurrency($expense->amount)}";
+        }
+        $lines[] = '  Note: These are one-time payments that have already occurred and should NOT be treated as ongoing operational expenses.';
 
         return implode("\n", $lines);
     }

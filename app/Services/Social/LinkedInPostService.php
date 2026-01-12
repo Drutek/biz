@@ -140,7 +140,7 @@ class LinkedInPostService
                     'call_to_action' => $postData['call_to_action'] ?? null,
                     'provider' => $response->provider,
                     'model' => $response->model,
-                    'tokens_used' => $response->tokenCount,
+                    'tokens_used' => $response->tokensUsed,
                     'generated_at' => now(),
                 ]);
 
@@ -234,7 +234,7 @@ class LinkedInPostService
                 'call_to_action' => $parsed['call_to_action'] ?? null,
                 'provider' => $response->provider,
                 'model' => $response->model,
-                'tokens_used' => $response->tokenCount,
+                'tokens_used' => $response->tokensUsed,
                 'generated_at' => now(),
             ]);
         } catch (\Throwable $e) {

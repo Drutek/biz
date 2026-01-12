@@ -290,6 +290,13 @@ Guidelines:
 - Hashtags should be relevant and specific (3-5 is optimal)
 - Avoid generic advice - be specific and actionable
 - Don't be overly promotional or salesy
+
+Writing style restrictions (IMPORTANT):
+- NEVER use em-dashes (—). Use commas, periods, or parentheses instead
+- Avoid cliches and overused phrases like: "game-changer", "at the end of the day", "move the needle", "low-hanging fruit", "synergy", "leverage", "dive deep", "unpack", "double down", "lean in", "circle back", "take it to the next level", "think outside the box", "paradigm shift", "disrupt", "innovative", "cutting-edge", "best-in-class", "world-class"
+- Don't start posts with "I'm excited to announce" or "Thrilled to share"
+- Avoid hollow superlatives and buzzwords
+- Write like a real person, not a corporate press release
 EOT;
     }
 

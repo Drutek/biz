@@ -5,6 +5,7 @@ use App\Jobs\CheckRunwayThresholds;
 use App\Jobs\DispatchDailyStandups;
 use App\Jobs\FetchNewsJob;
 use App\Jobs\GenerateDailyInsights;
+use App\Jobs\GenerateLinkedInPostsJob;
 use App\Jobs\GenerateNewspaperJob;
 use App\Jobs\GenerateWeeklyInsights;
 use App\Jobs\SendCashBalanceReminders;
@@ -40,6 +41,9 @@ Schedule::job(new CheckRunwayThresholds)->dailyAt('06:00');
 
 // Daily AI insights - daily at 7am (after threshold checks)
 Schedule::job(new GenerateDailyInsights)->dailyAt('07:00');
+
+// LinkedIn posts generation - daily at 7:30am (after insights)
+Schedule::job(new GenerateLinkedInPostsJob)->dailyAt('07:30');
 
 // Weekly AI insights - every Monday at 8am
 Schedule::job(new GenerateWeeklyInsights)->weeklyOn(1, '08:00');

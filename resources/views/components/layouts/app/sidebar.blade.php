@@ -23,6 +23,7 @@
             <flux:navlist variant="outline">
                 <flux:navlist.group :heading="__('Intelligence')" class="grid">
                     <flux:navlist.item icon="newspaper" :href="route('news.index')" :current="request()->routeIs('news.*')" wire:navigate>{{ __('News') }}</flux:navlist.item>
+                    <flux:navlist.item icon="share" :href="route('linkedin.index')" :current="request()->routeIs('linkedin.*')" wire:navigate>{{ __('LinkedIn Posts') }}</flux:navlist.item>
                     <flux:navlist.item icon="building-office" :href="route('tracked-entities.index')" :current="request()->routeIs('tracked-entities.*')" wire:navigate>{{ __('Tracked Entities') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>

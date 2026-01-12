@@ -7,6 +7,7 @@ use App\Livewire\Events\Create as EventsCreate;
 use App\Livewire\Events\Index as EventsIndex;
 use App\Livewire\Expenses\Index as ExpensesIndex;
 use App\Livewire\Insights\Index as InsightsIndex;
+use App\Livewire\LinkedInPosts\Index as LinkedInPostsIndex;
 use App\Livewire\News\Newspaper as NewsNewspaper;
 use App\Livewire\Notifications\Index as NotificationsIndex;
 use App\Livewire\Products\Index as ProductsIndex;
@@ -14,6 +15,7 @@ use App\Livewire\Products\Show as ProductsShow;
 use App\Livewire\Settings\ApiKeys;
 use App\Livewire\Settings\Appearance;
 use App\Livewire\Settings\BusinessProfile;
+use App\Livewire\Settings\LinkedIn as LinkedInSettings;
 use App\Livewire\Settings\Notifications;
 use App\Livewire\Settings\Password;
 use App\Livewire\Settings\Profile;
@@ -41,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('products/{product}', ProductsShow::class)->name('products.show');
     Route::get('tracked-entities', TrackedEntitiesIndex::class)->name('tracked-entities.index');
     Route::get('news', NewsNewspaper::class)->name('news.index');
+    Route::get('linkedin', LinkedInPostsIndex::class)->name('linkedin.index');
     Route::get('notifications', NotificationsIndex::class)->name('notifications.index');
     Route::get('advisor', AdvisorChat::class)->name('advisor.index');
 
@@ -59,6 +62,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/api-keys', ApiKeys::class)->name('settings.api-keys');
     Route::get('settings/business-profile', BusinessProfile::class)->name('settings.business-profile');
     Route::get('settings/notifications', Notifications::class)->name('settings.notifications');
+    Route::get('settings/linkedin', LinkedInSettings::class)->name('settings.linkedin');
     Route::get('settings/integrations', TaskIntegrations::class)->name('settings.integrations');
 
     Route::get('settings/two-factor', TwoFactor::class)

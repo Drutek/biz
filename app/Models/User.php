@@ -115,6 +115,14 @@ class User extends Authenticatable
     }
 
     /**
+     * @return HasMany<LinkedInPost, $this>
+     */
+    public function linkedInPosts(): HasMany
+    {
+        return $this->hasMany(LinkedInPost::class);
+    }
+
+    /**
      * @return HasMany<StandupEntry, $this>
      */
     public function standupEntries(): HasMany

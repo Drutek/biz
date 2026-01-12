@@ -29,6 +29,13 @@ class UserPreference extends Model
         'interactive_standup_enabled',
         'task_integration_provider',
         'task_integration_config',
+        'linkedin_posts_enabled',
+        'linkedin_post_frequency',
+        'linkedin_posts_per_generation',
+        'linkedin_default_tone',
+        'linkedin_topics',
+        'linkedin_include_hashtags',
+        'linkedin_include_cta',
     ];
 
     /**
@@ -47,6 +54,11 @@ class UserPreference extends Model
             'overdue_reminders_enabled' => 'boolean',
             'interactive_standup_enabled' => 'boolean',
             'task_integration_config' => 'array',
+            'linkedin_posts_enabled' => 'boolean',
+            'linkedin_posts_per_generation' => 'integer',
+            'linkedin_topics' => 'array',
+            'linkedin_include_hashtags' => 'boolean',
+            'linkedin_include_cta' => 'boolean',
         ];
     }
 

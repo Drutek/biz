@@ -13,22 +13,12 @@
             <div class="flex items-center gap-2">
                 <flux:button
                     variant="primary"
+                    icon="plus"
                     wire:click="generateNew"
-                    wire:loading.attr="disabled"
-                    wire:target="generateNew"
                 >
-                    <span wire:loading.remove wire:target="generateNew">
-                        <flux:icon name="sparkles" class="size-4 mr-1" />
-                        Generate New
-                    </span>
-                    <span wire:loading wire:target="generateNew">
-                        <flux:icon name="arrow-path" class="size-4 mr-1 animate-spin" />
-                        Generating...
-                    </span>
+                    Generate New
                 </flux:button>
-                <flux:button variant="ghost" href="{{ route('settings.linkedin') }}">
-                    <flux:icon name="cog-6-tooth" class="size-4" />
-                </flux:button>
+                <flux:button variant="ghost" icon="cog-6-tooth" href="{{ route('settings.linkedin') }}" />
             </div>
         </div>
     </div>
@@ -184,18 +174,10 @@
             </p>
             <flux:button
                 variant="primary"
+                icon="plus"
                 wire:click="generateNew"
-                wire:loading.attr="disabled"
-                wire:target="generateNew"
             >
-                <span wire:loading.remove wire:target="generateNew">
-                    <flux:icon name="sparkles" class="size-4 mr-1" />
-                    Generate Posts
-                </span>
-                <span wire:loading wire:target="generateNew">
-                    <flux:icon name="arrow-path" class="size-4 mr-1 animate-spin" />
-                    Generating...
-                </span>
+                Generate Posts
             </flux:button>
         </div>
     @endif
